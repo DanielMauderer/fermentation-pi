@@ -1,0 +1,83 @@
+/* define color variabes */
+:root {
+    --background-color: #12232E;
+    --primary-color: #007CC7;
+    --secondary-color: #4DA8DA;
+    --tertier-color: #203647;
+    --text-color: #EEFBFB;
+}
+
+/* make nav stick to left and center children verticaly with flex   */
+nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 10%;
+    height: 100%;
+    background-color: var(--primary-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* make nav items fill width and center horizontaly with flex*/
+nav a {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 10%;
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.5em;
+    font-weight: bold;
+}
+/* center horizontaly and vertically */
+nav a div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+/* on hover highlight with a round background */
+nav .selected {
+    background-color: var(--background-color);
+    border-top-left-radius: 40%;
+    border-bottom-left-radius: 40%;
+} 
+nav .prev {
+    background-color: var(--background-color);
+    div{
+        border-bottom-right-radius: 20%;
+        background-color: var(--primary-color);
+    }
+} 
+nav .next {
+    background-color: var(--background-color);
+    div{
+        border-top-right-radius: 20%;
+        background-color: var(--primary-color);
+    }
+} 
+
+
+/* make content fill the rest without overlapping with nav */
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    height: 100%;
+    background-color: var(--background-color);
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 0;
+}
+

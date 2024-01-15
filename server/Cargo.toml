@@ -1,0 +1,22 @@
+[package]
+name = "fermentation-pi"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = { version = "0.5.0", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+rppal = "0.16.1"
+rand = "0.8.5"
+rocket_cors = "0.6.0"
+rocket_codegen = "0.5.0"
+chrono = "0.4.31"
+engiffen = "0.8.1"
+glob = "0.3.1"
+serde_json = "1.0.111"
+nokhwa = {version = "0.9.4", features = ["input-v4l"]}
+color_quant = "1.0.1"
+image = {version = "0.23.8"}
+

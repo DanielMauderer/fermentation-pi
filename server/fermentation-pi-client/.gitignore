@@ -1,0 +1,30 @@
+fermentation-pi-client/# Logs
+fermentation-pi-client/logs
+fermentation-pi-client/*.log
+fermentation-pi-client/npm-debug.log*
+fermentation-pi-client/yarn-debug.log*
+fermentation-pi-client/yarn-error.log*
+fermentation-pi-client/pnpm-debug.log*
+fermentation-pi-client/lerna-debug.log*
+
+fermentation-pi-client/node_modules
+fermentation-pi-client/.DS_Store
+fermentation-pi-client/dist
+fermentation-pi-client/dist-ssr
+fermentation-pi-client/coverage
+fermentation-pi-client/*.local
+
+fermentation-pi-client//cypress/videos/
+fermentation-pi-client//cypress/screenshots/
+
+fermentation-pi-client/# Editor directories and files
+fermentation-pi-client/.vscode/*
+fermentation-pi-client/!.vscode/extensions.json
+fermentation-pi-client/.idea
+fermentation-pi-client/*.suo
+fermentation-pi-client/*.ntvs*
+fermentation-pi-client/*.njsproj
+fermentation-pi-client/*.sln
+fermentation-pi-client/*.sw?
+
+fermentation-pi-client/*.tsbuildinfo
