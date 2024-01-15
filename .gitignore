@@ -1,31 +1,31 @@
-server/target
+target
 /.vscode
-server/db
-server/tmp
-server/webcam
+db
+tmp
+webcam
 
 
-server/fermentation-pi-client/logs
-server/fermentation-pi-client/*.log
-server/fermentation-pi-client/npm-debug.log*
-server/fermentation-pi-client/yarn-debug.log*
-server/fermentation-pi-client/yarn-error.log*
-server/fermentation-pi-client/pnpm-debug.log*
-server/fermentation-pi-client/lerna-debug.log*
+fermentation-pi-client/logs
+fermentation-pi-client/*.log
+fermentation-pi-client/npm-debug.log*
+fermentation-pi-client/yarn-debug.log*
+fermentation-pi-client/yarn-error.log*
+fermentation-pi-client/pnpm-debug.log*
+fermentation-pi-client/lerna-debug.log*
 
-server/fermentation-pi-client/node_modules
-server/fermentation-pi-client/.DS_Store
-server/fermentation-pi-client/dist
-server/fermentation-pi-client/dist-ssr
-server/fermentation-pi-client/coverage
-server/fermentation-pi-client/*.local
+fermentation-pi-client/node_modules
+fermentation-pi-client/.DS_Store
+fermentation-pi-client/dist
+fermentation-pi-client/dist-ssr
+fermentation-pi-client/coverage
+fermentation-pi-client/*.local
 
 
-server/fermentation-pi-client/.idea
-server/fermentation-pi-client/*.suo
-server/fermentation-pi-client/*.ntvs*
-server/fermentation-pi-client/*.njsproj
-server/fermentation-pi-client/*.sln
-server/fermentation-pi-client/*.sw?
+fermentation-pi-client/.idea
+fermentation-pi-client/*.suo
+fermentation-pi-client/*.ntvs*
+fermentation-pi-client/*.njsproj
+fermentation-pi-client/*.sln
+fermentation-pi-client/*.sw?
 
-server/fermentation-pi-client/*.tsbuildinfo
+fermentation-pi-client/*.tsbuildinfo
