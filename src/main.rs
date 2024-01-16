@@ -1,3 +1,4 @@
+use rocket_cors::{AllowedOrigins, CorsOptions};
 use std::thread;
 
 #[macro_use]
@@ -35,6 +36,7 @@ fn rocket() -> _ {
 
     let mut index_routes = routes![route::index::index, route::index::files];
     index_routes[1].rank = 2;
+    let cors = CorsOptions::default().allowed_origins(AllowedOrigins::all());
 
     rocket::build()
         .mount("/", index_routes)
@@ -56,4 +58,5 @@ fn rocket() -> _ {
             "/sensor",
             routes![route::sensor_value::get, route::sensor_value::get_historic],
         )
+        .attach(cors.to_cors().unwrap())
 }

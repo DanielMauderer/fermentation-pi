@@ -57,7 +57,7 @@ let data =
 
   async function LoadInitialData() {
     
-    let sensorData = await axios.get('http://localhost:8000/sensor/historic/' + (Math.floor(Date.now() / 1000) - 60 * 60).toString() + '/' + Math.floor(Date.now() / 1000).toString() );
+    let sensorData = await axios.get('/sensor/historic/' + (Math.floor(Date.now() / 1000) - 60 * 60).toString() + '/' + Math.floor(Date.now() / 1000).toString() );
     return {
       Labels: sensorData.data.map((d: any) => new Date(d.time * 1000).toLocaleString()),
       Temperature: sensorData.data.map((d: any) => d.data.temp),
@@ -66,7 +66,7 @@ let data =
   }
 
   async function UpdateData() {
-    let sensorData = await axios.get('http://localhost:8000/sensor/');
+    let sensorData = await axios.get('./sensor/');
 
     data.labels.push(new Date().toLocaleString());
     data.datasets[0].data.push(sensorData.data.temp);
