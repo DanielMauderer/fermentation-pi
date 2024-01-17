@@ -8,8 +8,8 @@ use nokhwa::{Camera, CameraFormat, FrameFormat};
 
 pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     let mut camera = match Camera::new(
-        0,                                                              // index
-        Some(CameraFormat::new_from(640, 480, FrameFormat::MJPEG, 30)), // format
+        0,                                                                // index
+        Some(CameraFormat::new_from(1920, 1080, FrameFormat::MJPEG, 30)), // format
     ) {
         Ok(camera) => camera,
         Err(e) => {
@@ -28,11 +28,11 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         take_sensor_data();
         take_webcam_image(&mut camera);
+        thread::sleep(std::time::Duration::from_secs(60));
     }
 }
 
 fn take_sensor_data() {
-    thread::sleep(std::time::Duration::from_secs(1));
     let data = HistoricSensorData {
         time: chrono::Utc::now().timestamp() as u64,
         data: SensorData {
