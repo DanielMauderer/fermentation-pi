@@ -15,6 +15,7 @@ mod route {
 
 pub mod service {
     pub mod database;
+    pub mod gpio;
     pub mod sensor;
     pub mod webcam;
 }
@@ -31,7 +32,7 @@ fn rocket() -> _ {
     });
 
     let _ = thread::spawn(|| {
-        basic_runners::sensor_logger::entry_loop();
+        let _ = basic_runners::sensor_logger::entry_loop();
     });
 
     let mut index_routes = routes![route::index::index, route::index::files];
