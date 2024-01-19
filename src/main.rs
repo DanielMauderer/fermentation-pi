@@ -28,7 +28,7 @@ pub mod basic_runners {
 #[launch]
 fn rocket() -> _ {
     let _ = thread::spawn(|| {
-        basic_runners::manage_climate::entry_loop();
+        let _ = basic_runners::manage_climate::entry_loop();
     });
 
     let _ = thread::spawn(|| {

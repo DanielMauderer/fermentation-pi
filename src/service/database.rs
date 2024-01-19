@@ -18,98 +18,80 @@ pub mod project {
     }
 
     /* read project json path: db/projects.json */
-    pub fn read_projects() -> Vec<Project> {
-        let mut file = File::open("./db/projects.json").unwrap();
+    pub fn read_projects() -> Result<Vec<Project>, Box<dyn std::error::Error>> {
+        let mut file = File::open("./db/projects.json")?;
         let mut data = String::new();
-        file.read_to_string(&mut data).unwrap();
-        let projects: Vec<Project> = serde_json::from_str(&data).unwrap();
-        projects
+        file.read_to_string(&mut data)?;
+        let projects: Vec<Project> = serde_json::from_str(&data)?;
+        Ok(projects)
     }
 
-    pub fn read_project(id: u32) -> Project {
-        let projects = read_projects();
-        let project = projects.iter().find(|&p| p.id == id).unwrap();
-        project.clone()
-    }
-
-    pub fn create_new_project(name: String, description: String) -> Project {
-        let mut projects = read_projects();
-        let id = projects.len() as u32 + 1;
-        let created_at = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        let project = Project {
-            id,
-            name,
-            description,
-            created_at,
-            start_at: None,
-            endend_at: None,
+    pub fn read_project(id: u32) -> Result<Project, Box<dyn std::error::Error>> {
+        let projects = read_projects()?;
+        let project = match projects.iter().find(|&p| p.id == id) {
+            Some(project) => project,
+            None => return Err(Box::from("Project not found")),
         };
-        projects.push(project.clone());
-        let mut file = File::create("./db/projects.json").unwrap();
-        file.write_all(serde_json::to_string(&projects).unwrap().as_bytes())
-            .unwrap();
-        project
+        Ok(project.clone())
     }
 
-    pub fn update_project(id: u32, name: Option<String>, description: Option<String>) {
-        let mut projects = read_projects();
-        let project = projects.iter_mut().find(|p| p.id == id).unwrap();
-        if name.is_some() {
-            project.name = name.unwrap();
-        }
-        if description.is_some() {
-            project.description = description.unwrap();
-        }
-        let mut file = File::create("./db/projects.json").unwrap();
-        file.write_all(serde_json::to_string(&projects).unwrap().as_bytes())
-            .unwrap();
+    pub fn create_new_project(
+        name: String,
+        description: String,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        write_project(None, |project| {
+            project.name = name.clone();
+            project.description = description.clone();
+            Ok(())
+        })?;
+        Ok(())
     }
 
-    pub fn delete_project(id: u32) {
-        let mut projects = read_projects();
+    pub fn update_project(
+        id: u32,
+        name: Option<String>,
+        description: Option<String>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        write_project(Some(id), |project| {
+            project.name = name.clone().unwrap_or(project.name.clone());
+            project.description = description.clone().unwrap_or(project.description.clone());
+
+            Ok(())
+        })
+    }
+
+    pub fn delete_project(id: u32) -> Result<(), Box<dyn std::error::Error>> {
+        let mut projects = read_projects()?;
         let index = match projects.iter().position(|p| p.id == id) {
             Some(index) => index,
-            None => return,
+            None => return Err(Box::from("Project not found")),
         };
         projects.remove(index);
-        let mut file = File::create("./db/projects.json").unwrap();
-        file.write_all(serde_json::to_string(&projects).unwrap().as_bytes())
-            .unwrap();
+        let mut file = File::create("./db/projects.json")?;
+        file.write_all(serde_json::to_string(&projects)?.as_bytes())?;
+        Ok(())
     }
 
-    pub fn start_project(id: u32, start_at: u64) {
-        let mut projects = read_projects();
-        if check_if_project_is_running(&projects) {
-            return;
+    pub fn start_project(id: u32, start_at: u64) -> Result<(), Box<dyn std::error::Error>> {
+        write_project(Some(id), |project| {
+            project.start_at = Some(start_at);
+            Ok(())
+        })
+    }
+
+    pub fn end_project(id: u32, endend_at: u64) -> Result<(), Box<dyn std::error::Error>> {
+        write_project(Some(id), |project| {
+            project.endend_at = Some(endend_at);
+            Ok(())
+        })
+    }
+
+    pub fn get_project(id: u32) -> Result<Project, Box<dyn std::error::Error>> {
+        let projects = read_projects()?;
+        match projects.iter().find(|&p| p.id == id) {
+            Some(project) => Ok(project.clone()),
+            None => return Err(Box::from("Project not found")),
         }
-        let project = projects.iter_mut().find(|p| p.id == id).unwrap();
-
-        if project.start_at.is_some() {
-            return;
-        }
-
-        project.start_at = Some(start_at);
-        let mut file = File::create("./db/projects.json").unwrap();
-        file.write_all(serde_json::to_string(&projects).unwrap().as_bytes())
-            .unwrap();
-    }
-
-    pub fn end_project(id: u32, endend_at: u64) {
-        let mut projects = read_projects();
-        let project = projects.iter_mut().find(|p| p.id == id).unwrap();
-        project.endend_at = Some(endend_at);
-        let mut file = File::create("./db/projects.json").unwrap();
-        file.write_all(serde_json::to_string(&projects).unwrap().as_bytes())
-            .unwrap();
-    }
-
-    pub fn get_project(id: u32) -> Project {
-        let projects = read_projects();
-        let project = projects.iter().find(|&p| p.id == id).unwrap();
-        project.clone()
     }
 
     fn check_if_project_is_running(projects: &Vec<Project>) -> bool {
@@ -119,6 +101,52 @@ pub mod project {
             }
         }
         false
+    }
+
+    fn write_project(
+        id: Option<u32>,
+        f: impl Fn(&mut Project) -> Result<(), Box<dyn std::error::Error>>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut projects = read_projects()?;
+        match id {
+            Some(id) => mut_existing_project(&mut projects, id, &f)?,
+            None => mut_new_project(&mut projects, f)?,
+        };
+        let mut file = File::create("./db/projects.json")?;
+        file.write_all(serde_json::to_string(&projects)?.as_bytes())?;
+        Ok(())
+    }
+
+    fn mut_new_project(
+        projects: &mut Vec<Project>,
+        f: impl Fn(&mut Project) -> Result<(), Box<dyn std::error::Error>>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let id = projects.len() as u32 + 1;
+        let created_at = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)?
+            .as_secs();
+        let mut project = Project {
+            id,
+            name: String::from(""),
+            description: String::from(""),
+            created_at,
+            start_at: None,
+            endend_at: None,
+        };
+        f(&mut project)?;
+        projects.push(project.clone());
+        Ok(())
+    }
+
+    fn mut_existing_project(
+        projects: &mut Vec<Project>,
+        id: u32,
+        f: &impl Fn(&mut Project) -> Result<(), Box<dyn std::error::Error>>,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        match projects.iter_mut().find(|p| p.id == id) {
+            Some(project) => f(project),
+            None => return Err(Box::from("Project not found")),
+        }
     }
 }
 
@@ -155,53 +183,52 @@ pub mod sensor {
         s.serialize_f32((x * 100.0).round() / 100.0)
     }
 
-    pub fn get_all_data(time: u64) -> Vec<HistoricSensorData> {
+    pub fn get_all_data(time: u64) -> Result<Vec<HistoricSensorData>, Box<dyn std::error::Error>> {
         let historic_sensor_data: Vec<HistoricSensorData> = Vec::new();
         let date = chrono::NaiveDateTime::from_timestamp_opt(time as i64, 0);
 
-        create_new_sensor_page(time);
+        create_new_sensor_page(time)?;
 
         match date {
             Some(date) => {
                 let path = format!("./db/sensor/{}.json", date.format("%Y-%m-%d"));
-                let mut file = File::open(path).unwrap();
+                let mut file = File::open(path)?;
                 let mut data = String::new();
-                file.read_to_string(&mut data).unwrap();
-                let historic_data: Vec<HistoricSensorData> = serde_json::from_str(&data).unwrap();
-                return historic_data;
+                file.read_to_string(&mut data)?;
+                let historic_data: Vec<HistoricSensorData> = serde_json::from_str(&data)?;
+                return Ok(historic_data);
             }
             None => {}
         }
-        historic_sensor_data
+        Ok(historic_sensor_data)
     }
 
-    pub fn add_datapoint(data: HistoricSensorData) {
-        let date = chrono::NaiveDateTime::from_timestamp_opt(data.time as i64, 0);
-        match date {
+    pub fn add_datapoint(data: HistoricSensorData) -> Result<(), Box<dyn std::error::Error>> {
+        match chrono::NaiveDateTime::from_timestamp_opt(data.time as i64, 0) {
             Some(date) => {
                 let path = format!("./db/sensor/{}.json", date.format("%Y-%m-%d"));
-                let mut historic_data = get_all_data(data.time);
+                let mut historic_data = get_all_data(data.time)?;
                 historic_data.push(data);
-                let mut file = File::create(path).unwrap();
-                file.write_all(serde_json::to_string(&historic_data).unwrap().as_bytes())
-                    .unwrap();
+                let mut file = File::create(path)?;
+                file.write_all(serde_json::to_string(&historic_data)?.as_bytes())?;
             }
             None => {}
         }
+        Ok(())
     }
 
-    fn create_new_sensor_page(time: u64) {
-        let date = chrono::NaiveDateTime::from_timestamp_opt(time as i64, 0);
-        match date {
+    fn create_new_sensor_page(time: u64) -> Result<(), Box<dyn std::error::Error>> {
+        match chrono::NaiveDateTime::from_timestamp_opt(time as i64, 0) {
             Some(date) => {
                 let path = format!("./db/sensor/{}.json", date.format("%Y-%m-%d"));
                 if Path::new(&path).exists() {
-                    return;
+                    return Ok(());
                 }
-                let mut file = File::create(path).unwrap();
-                file.write_all("[]".as_bytes()).unwrap();
+                let mut file = File::create(path)?;
+                file.write_all("[]".as_bytes())?;
             }
             None => {}
         }
+        Ok(())
     }
 }

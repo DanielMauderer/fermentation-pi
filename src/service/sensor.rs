@@ -1,13 +1,12 @@
 use rand::Rng;
 
-pub fn get_temperature() -> f32 {
+use super::database::sensor::SensorData;
+
+pub fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
     let mut rng = rand::thread_rng();
 
-    return rng.gen_range(0.0..40.0);
-}
+    let temp = rng.gen_range(20.0..=30.0);
+    let hum = rng.gen_range(40.0..=60.0);
 
-pub fn get_humidity() -> f32 {
-    let mut rng = rand::thread_rng();
-
-    return rng.gen_range(0.0..100.0);
+    return Ok(SensorData { temp, hum });
 }

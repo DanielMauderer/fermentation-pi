@@ -1,8 +1,8 @@
 use std::thread;
 
 use crate::service::{
-    database::sensor::{add_datapoint, HistoricSensorData, SensorData},
-    sensor::{get_humidity, get_temperature},
+    database::sensor::{add_datapoint, HistoricSensorData},
+    sensor::get_sensor_data,
 };
 use nokhwa::{Camera, CameraFormat, FrameFormat};
 
@@ -26,21 +26,18 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
     loop {
-        take_sensor_data();
-        let _ = take_webcam_image(&mut camera);
+        take_sensor_data()?;
+        let _ = take_webcam_image(&mut camera)?;
         thread::sleep(std::time::Duration::from_secs(60));
     }
 }
 
-fn take_sensor_data() {
+fn take_sensor_data() -> Result<(), Box<dyn std::error::Error>> {
     let data = HistoricSensorData {
         time: chrono::Utc::now().timestamp() as u64,
-        data: SensorData {
-            temp: get_temperature(),
-            hum: get_humidity(),
-        },
+        data: get_sensor_data()?,
     };
-    add_datapoint(data);
+    add_datapoint(data)
 }
 
 fn take_webcam_image(camera: &mut Camera) -> Result<(), Box<dyn std::error::Error>> {
