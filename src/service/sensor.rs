@@ -1,12 +1,10 @@
-use rand::Rng;
-
-use super::database::sensor::SensorData;
+use super::{database::sensor::SensorData, gpio::read_sensor_data};
 
 pub fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
-    let mut rng = rand::thread_rng();
+    let (temperature, humidity) = read_sensor_data()?;
 
-    let temp = rng.gen_range(20.0..=30.0);
-    let hum = rng.gen_range(40.0..=60.0);
-
-    return Ok(SensorData { temp, hum });
+    return Ok(SensorData {
+        temp: temperature,
+        hum: humidity,
+    });
 }
