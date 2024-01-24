@@ -191,22 +191,14 @@ fn convert_data_to_float(data: u16) -> f32 {
 }
 
 fn read_data(array: &mut [u8; 5]) -> Result<(), Box<dyn std::error::Error>> {
-    let pin = get_pin_as_input(SENSOR_PIN)?;
-
-    if pin.is_low() {
-        thread::sleep(std::time::Duration::from_micros(80));
-        if pin.is_high() {
-            thread::sleep(std::time::Duration::from_micros(80));
-            for index in 0..array.len() {
-                array[index] = read_byte()?;
-                if array[index] == ERROR_TIMEOUT {
-                    return Err(Box::from("Timeout"));
-                }
-            }
-            if array[4] != ((array[0] + array[1] + array[2] + array[3]) & 0xFF) {
-                return Err(Box::from("Checksum"));
-            }
+    for index in 0..array.len() {
+        array[index] = read_byte()?;
+        if array[index] == ERROR_TIMEOUT {
+            return Err(Box::from("Timeout"));
         }
+    }
+    if array[4] != ((array[0] + array[1] + array[2] + array[3]) & 0xFF) {
+        return Err(Box::from("Checksum"));
     }
     Ok(())
 }
