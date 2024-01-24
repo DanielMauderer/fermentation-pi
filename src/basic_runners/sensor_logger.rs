@@ -26,9 +26,9 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
     loop {
-        take_sensor_data()?;
+        //take_sensor_data()?;
         let _ = take_webcam_image(&mut camera)?;
-        thread::sleep(std::time::Duration::from_secs(60));
+        thread::sleep(std::time::Duration::from_secs(1));
     }
 }
 
@@ -48,8 +48,8 @@ fn take_webcam_image(camera: &mut Camera) -> Result<(), Box<dyn std::error::Erro
             return Err(Box::from(e));
         }
     };
-    let path = format!("./webcam/0/{}.jpg", chrono::Utc::now().timestamp());
-    match frame.save_with_format(path, image::ImageFormat::Jpeg) {
+    let path = format!("./webcam/0/{}.png", chrono::Utc::now().timestamp());
+    match frame.save_with_format(path, image::ImageFormat::Png) {
         Ok(_) => Ok(()),
         Err(e) => {
             println!("Error: {}", e);
