@@ -24,9 +24,7 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
     start_signal()?;
 
-    let timeout_start = std::time::Instant::now();
-
-    ready_sensor(timeout_start)?;
+    ready_sensor()?;
 
     read_data(&mut array)?;
 
@@ -36,7 +34,9 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     ));
 }
 
-fn ready_sensor(timeout_start: std::time::Instant) -> Result<(), Box<dyn std::error::Error>> {
+fn ready_sensor() -> Result<(), Box<dyn std::error::Error>> {
+    let timeout_start = std::time::Instant::now();
+
     let pin = get_pin_as_input(SENSOR_PIN)?;
     Ok(while pin.is_high() {
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
@@ -147,6 +147,7 @@ fn read_byte() -> Result<u8, Box<dyn std::error::Error>> {
         }
         while pin.is_high() {}
     }
+    print!("read value: {}", value);
     Ok(value)
 }
 
