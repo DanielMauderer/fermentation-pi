@@ -9,11 +9,11 @@ static LED2_LOCK: Mutex<u8> = Mutex::new(0);
 static LED3_LOCK: Mutex<u8> = Mutex::new(0);
 static SENSOR_LOCK: Mutex<u8> = Mutex::new(0);
 
-const SENSOR_PIN: u8 = 4;
-const HEATING_PIN: u8 = 4;
-const HUMIDIFIER_PIN: u8 = 4;
-const LED1_PIN: u8 = 4;
-const LED2_PIN: u8 = 4;
+const SENSOR_PIN: u8 = 27;
+const HEATING_PIN: u8 = 17;
+const HUMIDIFIER_PIN: u8 = 22;
+const LED1_PIN: u8 = 2;
+const LED2_PIN: u8 = 3;
 const LED3_PIN: u8 = 4;
 const TIMEOUT_DURATION: u128 = 300;
 const ERROR_TIMEOUT: u8 = 253;
@@ -26,12 +26,7 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 
     let timeout_start = std::time::Instant::now();
 
-    let pin = get_pin_as_input(SENSOR_PIN)?;
-    while pin.is_high() {
-        if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
-            return Err(Box::from("Timeout"));
-        }
-    }
+    ready_sensor(timeout_start)?;
 
     read_data(&mut array)?;
 
@@ -39,6 +34,15 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
         convert_data_to_float(((array[2] as u16) << 8) | array[3] as u16),
     ));
+}
+
+fn ready_sensor(timeout_start: std::time::Instant) -> Result<(), Box<dyn std::error::Error>> {
+    let pin = get_pin_as_input(SENSOR_PIN)?;
+    Ok(while pin.is_high() {
+        if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
+            return Err(Box::from("Timeout"));
+        }
+    })
 }
 
 pub fn read_sensor_data_rand() -> Result<(f32, f32), Box<dyn std::error::Error>> {
