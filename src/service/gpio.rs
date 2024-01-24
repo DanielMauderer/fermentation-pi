@@ -38,6 +38,7 @@ fn ready_sensor() -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
 
     let pin = get_pin_as_input(SENSOR_PIN)?;
+    while pin.is_low() {}
     Ok(while pin.is_high() {
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
             return Err(Box::from("Timeout"));
