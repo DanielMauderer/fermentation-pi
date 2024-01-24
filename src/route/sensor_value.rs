@@ -16,7 +16,10 @@ pub fn get_historic(start_ticks: u64, end_ticks: u64) -> Json<Option<Vec<Histori
 pub fn get() -> Json<Option<SensorData>> {
     match get_sensor_data() {
         Ok(sensor) => Json(Some(sensor)),
-        Err(_) => Json(None),
+        Err(e) => {
+            println!("Error: {}", e);
+            Json(None)
+        }
     }
 }
 
