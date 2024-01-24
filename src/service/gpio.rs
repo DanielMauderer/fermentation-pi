@@ -36,10 +36,13 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 
 fn ready_sensor() -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
+    print!("waiting for sensor ready");
 
     let pin = get_pin_as_input(SENSOR_PIN)?;
     while pin.is_low() {}
     Ok(while pin.is_high() {
+        print!("sensor sending ready");
+
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
             return Err(Box::from("Timeout"));
         }
@@ -128,6 +131,7 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
 
 fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(SENSOR_PIN)?;
+    print!("sending start signal");
 
     pin.set_low();
     thread::sleep(std::time::Duration::from_millis(18));
@@ -192,7 +196,10 @@ fn convert_data_to_float(data: u16) -> f32 {
 }
 
 fn read_data(array: &mut [u8; 5]) -> Result<(), Box<dyn std::error::Error>> {
+    print!("reading sensor data");
+
     for index in 0..array.len() {
+        print!("reading byte {}", index);
         array[index] = read_byte()?;
         if array[index] == ERROR_TIMEOUT {
             return Err(Box::from("Timeout"));
