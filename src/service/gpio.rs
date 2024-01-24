@@ -36,12 +36,12 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 
 fn ready_sensor() -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
-    print!("waiting for sensor ready");
+    error!("waiting for sensor ready");
 
     let pin = get_pin_as_input(SENSOR_PIN)?;
     while pin.is_low() {}
     Ok(while pin.is_high() {
-        print!("sensor sending ready");
+        error!("sensor sending ready");
 
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
             return Err(Box::from("Timeout"));
@@ -131,7 +131,7 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
 
 fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(SENSOR_PIN)?;
-    print!("sending start signal");
+    error!("sending start signal");
 
     pin.set_low();
     thread::sleep(std::time::Duration::from_millis(18));
@@ -152,7 +152,7 @@ fn read_byte() -> Result<u8, Box<dyn std::error::Error>> {
         }
         while pin.is_high() {}
     }
-    print!("read value: {}", value);
+    error!("read value: {}", value);
     Ok(value)
 }
 
@@ -161,12 +161,12 @@ fn get_pin_as_input(pin_number: u8) -> Result<InputPin, Box<dyn std::error::Erro
         Ok(gpio) => match gpio.get(pin_number) {
             Ok(pin) => return Ok(pin.into_input()),
             Err(e) => {
-                println!("Error: {}", e);
+                error!("Error: {}", e);
                 return Err(Box::from(e));
             }
         },
         Err(e) => {
-            println!("Error: {}", e);
+            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     };
@@ -177,12 +177,12 @@ fn get_pin_as_output(pin_number: u8) -> Result<OutputPin, Box<dyn std::error::Er
         Ok(gpio) => match gpio.get(pin_number) {
             Ok(pin) => return Ok(pin.into_output()),
             Err(e) => {
-                println!("Error: {}", e);
+                error!("Error: {}", e);
                 return Err(Box::from(e));
             }
         },
         Err(e) => {
-            println!("Error: {}", e);
+            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     };
@@ -196,10 +196,10 @@ fn convert_data_to_float(data: u16) -> f32 {
 }
 
 fn read_data(array: &mut [u8; 5]) -> Result<(), Box<dyn std::error::Error>> {
-    print!("reading sensor data");
+    error!("reading sensor data");
 
     for index in 0..array.len() {
-        print!("reading byte {}", index);
+        error!("reading byte {}", index);
         array[index] = read_byte()?;
         if array[index] == ERROR_TIMEOUT {
             return Err(Box::from("Timeout"));
