@@ -136,8 +136,8 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
     let mut timeout_start;
     for i in 0..8 {
-        turn_off_heating()?;
         while pin.is_low() {}
+        turn_off_heating()?;
         timeout_start = std::time::Instant::now();
         while pin.is_high() {}
         if timeout_start.elapsed().as_micros() > 30 {
