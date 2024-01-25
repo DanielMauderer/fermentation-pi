@@ -45,11 +45,13 @@ fn ready_sensor(pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
 
     while pin.is_low() {}
-    Ok(while pin.is_high() {
+    while pin.is_high() {
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
             return Err(Box::from("Timeout"));
         }
-    })
+    }
+    while pin.is_low() {}
+    Ok(())
 }
 
 pub fn read_sensor_data_rand() -> Result<(f32, f32), Box<dyn std::error::Error>> {
