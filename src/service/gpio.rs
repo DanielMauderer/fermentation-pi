@@ -45,6 +45,7 @@ fn start_signal(pin: &mut IoPin) -> Result<(), Box<dyn std::error::Error>> {
 fn ready_sensor(pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
 
+    while pin.is_high() {}
     while pin.is_low() {}
     while pin.is_high() {
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
