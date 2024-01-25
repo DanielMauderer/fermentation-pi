@@ -185,7 +185,9 @@ fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error:
     let temp = ((array[0] as u16) << 8) | array[1] as u16;
     let hum = ((array[2] as u16) << 8) | array[3] as u16;
     error!("Temp: {} Hum: {}", temp, hum);
-    if array[4] != ((array[0] + array[1] + array[2] + array[3]) & 0xFF) {
+    let sum = (array[0] + array[1] + array[2] + array[3]);
+    let check_sum = sum & 0xFF;
+    if array[4] != check_sum {
         return Err(Box::from("Checksum"));
     }
     Ok(())
