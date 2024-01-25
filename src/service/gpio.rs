@@ -22,11 +22,15 @@ const ERROR_TIMEOUT: u8 = 253;
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let _unused = SENSOR_LOCK.lock().unwrap();
     let mut array: [u8; 5] = [0; 5];
+    turn_off_heating()?;
     start_signal()?;
+    turn_on_heating()?;
     let in_pin = &get_pin(SENSOR_PIN)?.into_input();
+    turn_off_heating()?;
     ready_sensor(in_pin)?;
-
+    turn_on_heating()?;
     read_data(&mut array, in_pin)?;
+    turn_off_heating()?;
 
     return Ok((
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
