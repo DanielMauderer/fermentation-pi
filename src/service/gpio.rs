@@ -11,9 +11,9 @@ static LED3_LOCK: Mutex<u8> = Mutex::new(0);
 static SENSOR_LOCK: Mutex<u8> = Mutex::new(0);
 
 const SENSOR_PIN: u8 = 27;
-const HEATING_PIN: u8 = 17;
+const HEATING_PIN: u8 = 2;
 const HUMIDIFIER_PIN: u8 = 22;
-const LED1_PIN: u8 = 2;
+const LED1_PIN: u8 = 17;
 const LED2_PIN: u8 = 3;
 const LED3_PIN: u8 = 4;
 const TIMEOUT_DURATION: u128 = 300;
@@ -39,6 +39,7 @@ fn ready_sensor(pin: &InputPin) -> Result<(), Box<dyn std::error::Error>> {
     info!("waiting for sensor ready");
 
     while pin.is_low() {}
+    turn_on_heating()?;
     Ok(while pin.is_high() {
         info!("sensor sending ready");
 
@@ -132,7 +133,9 @@ fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
     info!("sending start signal");
     let mut pin = get_pin(SENSOR_PIN)?.into_output();
     pin.set_low();
+    turn_on_heating()?;
     thread::sleep(std::time::Duration::from_millis(18));
+    turn_off_heating()?;
     pin.set_high();
     Ok(())
 }
@@ -143,9 +146,12 @@ fn read_byte(pin: &InputPin) -> Result<u8, Box<dyn std::error::Error>> {
     for i in 0..8 {
         info!("reading bit {}", i);
         while pin.is_low() {}
+        turn_on_heating()?;
         while pin.is_high() {}
+        turn_off_heating()?;
         timeout_start = std::time::Instant::now();
         while pin.is_low() {}
+        turn_on_heating()?;
         if timeout_start.elapsed().as_nanos() > 30 {
             value |= 1 << (7 - i);
         }
