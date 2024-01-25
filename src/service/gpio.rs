@@ -23,8 +23,7 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let _unused = SENSOR_LOCK.lock().unwrap();
     thread::sleep(std::time::Duration::from_millis(60));
     let mut array: [u8; 5] = [0; 5];
-    let out_pin = get_pin(SENSOR_PIN)?.into_output();
-    start_signal(out_pin)?;
+    start_signal()?;
     let in_pin = &get_pin(SENSOR_PIN)?.into_input();
     ready_sensor(in_pin)?;
 
@@ -130,9 +129,9 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn start_signal(mut pin: OutputPin) -> Result<(), Box<dyn std::error::Error>> {
+fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
     info!("sending start signal");
-
+    let mut pin = get_pin(SENSOR_PIN)?.into_output();
     pin.set_low();
     thread::sleep(std::time::Duration::from_millis(18));
     pin.set_high();
