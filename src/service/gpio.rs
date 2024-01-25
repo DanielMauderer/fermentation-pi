@@ -21,7 +21,6 @@ const ERROR_TIMEOUT: u8 = 253;
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let _unused = SENSOR_LOCK.lock().unwrap();
-    thread::sleep(std::time::Duration::from_millis(60));
     let mut array: [u8; 5] = [0; 5];
     start_signal()?;
     let in_pin = &get_pin(SENSOR_PIN)?.into_input();
@@ -140,14 +139,16 @@ fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
 
 fn read_byte(pin: &InputPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
+    let mut timeout_start = std::time::Instant::now();
     for i in 0..8 {
         info!("reading bit {}", i);
         while pin.is_low() {}
-        thread::sleep(std::time::Duration::from_micros(30));
-        if pin.is_high() {
+        while pin.is_high() {}
+        timeout_start = std::time::Instant::now();
+        while pin.is_low() {}
+        if timeout_start.elapsed().as_nanos() > 30 {
             value |= 1 << (7 - i);
         }
-        while pin.is_high() {}
     }
     info!("read value: {}", value);
     Ok(value)
