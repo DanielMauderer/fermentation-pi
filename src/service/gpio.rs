@@ -20,7 +20,6 @@ const TIMEOUT_DURATION: u128 = 300;
 const ERROR_TIMEOUT: u8 = 253;
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
-    let _unused = SENSOR_LOCK.lock().unwrap();
     let mut array: [u8; 5] = [0; 5];
     turn_off_heating()?;
     let mut pin: IoPin = get_pin(SENSOR_PIN)?.into_io(rppal::gpio::Mode::Output);
@@ -44,12 +43,9 @@ fn start_signal(pin: &mut IoPin) -> Result<(), Box<dyn std::error::Error>> {
 
 fn ready_sensor(pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
-    info!("waiting for sensor ready");
 
     while pin.is_low() {}
     Ok(while pin.is_high() {
-        info!("sensor sending ready");
-
         if timeout_start.elapsed().as_millis() > TIMEOUT_DURATION {
             return Err(Box::from("Timeout"));
         }
@@ -140,8 +136,7 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
     let mut timeout_start;
     for i in 0..8 {
-        turn_on_heating()?;
-        info!("reading bit {}", i);
+        turn_off_heating()?;
         while pin.is_low() {}
         timeout_start = std::time::Instant::now();
         while pin.is_high() {}
@@ -150,7 +145,6 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
         }
         turn_off_heating()?;
     }
-    info!("read value: {}", value);
     Ok(value)
 }
 
@@ -159,12 +153,12 @@ fn get_pin(pin_number: u8) -> Result<Pin, Box<dyn std::error::Error>> {
         Ok(gpio) => match gpio.get(pin_number) {
             Ok(pin) => return Ok(pin),
             Err(e) => {
-                info!("Error: {}", e);
+                error!("Error: {}", e);
                 return Err(Box::from(e));
             }
         },
         Err(e) => {
-            info!("Error: {}", e);
+            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     };
@@ -178,10 +172,7 @@ fn convert_data_to_float(data: u16) -> f32 {
 }
 
 fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
-    info!("reading sensor data");
-
     for index in 0..array.len() {
-        info!("reading byte {}", index);
         array[index] = read_byte(pin)?;
         if array[index] == ERROR_TIMEOUT {
             return Err(Box::from("Timeout"));
