@@ -135,7 +135,7 @@ fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
     pin.set_low();
     thread::sleep(std::time::Duration::from_millis(18));
     pin.set_high();
-    thread::sleep(std::time::Duration::from_millis(20));
+    thread::sleep(std::time::Duration::from_nanos(20));
     pin.set_low();
     Ok(())
 }
