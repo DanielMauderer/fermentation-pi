@@ -181,8 +181,8 @@ fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error:
             return Err(Box::from("Timeout"));
         }
     }
-    let temp = convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16);
-    let hum = convert_data_to_float(((array[2] as u16) << 8) | array[3] as u16);
+    let temp = ((array[0] as u16) << 8) | array[1] as u16;
+    let hum = ((array[2] as u16) << 8) | array[3] as u16;
     error!("Temp: {} Hum: {}", temp, hum);
     if array[4] != ((array[0] + array[1] + array[2] + array[3]) & 0xFF) {
         return Err(Box::from("Checksum"));
