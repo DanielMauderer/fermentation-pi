@@ -152,7 +152,6 @@ fn read_byte() -> Result<u8, Box<dyn std::error::Error>> {
         if pin.is_high() {
             value |= 1 << (7 - i);
         }
-        while pin.is_high() {}
     }
     info!("read value: {}", value);
     Ok(value)
