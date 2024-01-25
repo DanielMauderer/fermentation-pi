@@ -22,7 +22,6 @@ const ERROR_TIMEOUT: u8 = 253;
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
-    turn_off_heating()?;
     let mut pin: IoPin = get_pin(SENSOR_PIN)?.into_io(rppal::gpio::Mode::Output);
     start_signal(&mut pin)?;
     pin.set_mode(Mode::Input);
@@ -138,16 +137,25 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
 
 fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
-    let mut timeout_start;
+    let mut high_time;
+    let mut timeout;
     for i in 0..8 {
-        while pin.is_low() {}
-        turn_off_heating()?;
-        timeout_start = std::time::Instant::now();
-        while pin.is_high() {}
-        if timeout_start.elapsed().as_micros() > 30 {
+        timeout = std::time::Instant::now();
+        while pin.is_low() {
+            if timeout.elapsed().as_millis() > TIMEOUT_DURATION {
+                return Err(Box::from("Timeout"));
+            }
+        }
+        timeout = std::time::Instant::now();
+        high_time = std::time::Instant::now();
+        while pin.is_high() {
+            if timeout.elapsed().as_millis() > TIMEOUT_DURATION {
+                return Err(Box::from("Timeout"));
+            }
+        }
+        if high_time.elapsed().as_micros() > 30 {
             value |= 1 << (7 - i);
         }
-        turn_off_heating()?;
     }
     Ok(value)
 }
@@ -178,13 +186,7 @@ fn convert_data_to_float(data: u16) -> f32 {
 fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     for index in 0..array.len() {
         array[index] = read_byte(pin)?;
-        if array[index] == ERROR_TIMEOUT {
-            return Err(Box::from("Timeout"));
-        }
     }
-    let temp = ((array[0] as u16) << 8) | array[1] as u16;
-    let hum = ((array[2] as u16) << 8) | array[3] as u16;
-    error!("Temp: {} Hum: {}", temp, hum);
     if array[4]
         != (array[0]
             .wrapping_add(array[1])
