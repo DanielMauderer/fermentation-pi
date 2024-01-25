@@ -1,5 +1,5 @@
 use rocket::form::error;
-use rppal::gpio::{Gpio, InputPin, OutputPin};
+use rppal::gpio::{Gpio, InputPin, OutputPin, Pin};
 use std::sync::Mutex;
 use std::thread;
 
@@ -23,11 +23,12 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let _unused = SENSOR_LOCK.lock().unwrap();
     thread::sleep(std::time::Duration::from_millis(60));
     let mut array: [u8; 5] = [0; 5];
-    start_signal()?;
+    let out_pin = get_pin(SENSOR_PIN)?.into_output();
+    start_signal(out_pin)?;
+    let in_pin = &get_pin(SENSOR_PIN)?.into_input();
+    ready_sensor(in_pin)?;
 
-    ready_sensor()?;
-
-    read_data(&mut array)?;
+    read_data(&mut array, in_pin)?;
 
     return Ok((
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
@@ -35,11 +36,10 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     ));
 }
 
-fn ready_sensor() -> Result<(), Box<dyn std::error::Error>> {
+fn ready_sensor(pin: &InputPin) -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
     info!("waiting for sensor ready");
 
-    let pin = get_pin_as_input(SENSOR_PIN)?;
     while pin.is_low() {}
     Ok(while pin.is_high() {
         info!("sensor sending ready");
@@ -58,28 +58,28 @@ pub fn read_sensor_data_rand() -> Result<(f32, f32), Box<dyn std::error::Error>>
 
 pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
     let _unused = HEATING_LOCK.lock().unwrap();
-    let mut pin = get_pin_as_output(HEATING_PIN)?;
+    let mut pin = get_pin(HEATING_PIN)?.into_output();
     pin.set_high();
     Ok(())
 }
 
 pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
     let _unused = HEATING_LOCK.lock().unwrap();
-    let mut pin = get_pin_as_output(HEATING_PIN)?;
+    let mut pin = get_pin(HEATING_PIN)?.into_output();
     pin.set_low();
     Ok(())
 }
 
 pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let _unused = HUMIDIFIER_LOCK.lock().unwrap();
-    let mut pin = get_pin_as_output(HUMIDIFIER_PIN)?;
+    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
     pin.set_high();
     Ok(())
 }
 
 pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let _unused = HUMIDIFIER_LOCK.lock().unwrap();
-    let mut pin = get_pin_as_output(HUMIDIFIER_PIN)?;
+    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
     pin.set_low();
     Ok(())
 }
@@ -90,16 +90,16 @@ pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
         1 => {
             pin = {
                 let _unused = LED1_LOCK.lock().unwrap();
-                get_pin_as_output(LED1_PIN)?
+                get_pin(LED1_PIN)?.into_output()
             }
         }
         2 => {
             let _unused = LED2_LOCK.lock().unwrap();
-            pin = get_pin_as_output(LED2_PIN)?
+            pin = get_pin(LED2_PIN)?.into_output()
         }
         3 => {
             let _unused = LED3_LOCK.lock().unwrap();
-            pin = get_pin_as_output(LED3_PIN)?
+            pin = get_pin(LED3_PIN)?.into_output()
         }
         _ => return Err(Box::from("Index")),
     };
@@ -113,16 +113,16 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
         1 => {
             pin = {
                 let _unused = LED1_LOCK.lock().unwrap();
-                get_pin_as_output(LED1_PIN)?
+                get_pin(LED1_PIN)?.into_output()
             }
         }
         2 => {
             let _unused = LED2_LOCK.lock().unwrap();
-            pin = get_pin_as_output(LED2_PIN)?
+            pin = get_pin(LED2_PIN)?.into_output()
         }
         3 => {
             let _unused = LED3_LOCK.lock().unwrap();
-            pin = get_pin_as_output(LED3_PIN)?
+            pin = get_pin(LED3_PIN)?.into_output()
         }
         _ => return Err(Box::from("Index")),
     };
@@ -130,20 +130,18 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin = get_pin_as_output(SENSOR_PIN)?;
+fn start_signal(mut pin: OutputPin) -> Result<(), Box<dyn std::error::Error>> {
     info!("sending start signal");
 
     pin.set_low();
     thread::sleep(std::time::Duration::from_millis(18));
     pin.set_high();
-    thread::sleep(std::time::Duration::from_micros(40));
+    thread::sleep(std::time::Duration::from_millis(20));
     pin.set_low();
     Ok(())
 }
 
-fn read_byte() -> Result<u8, Box<dyn std::error::Error>> {
-    let pin = get_pin_as_input(SENSOR_PIN)?;
+fn read_byte(pin: &InputPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
     for i in 0..8 {
         info!("reading bit {}", i);
@@ -157,26 +155,10 @@ fn read_byte() -> Result<u8, Box<dyn std::error::Error>> {
     Ok(value)
 }
 
-fn get_pin_as_input(pin_number: u8) -> Result<InputPin, Box<dyn std::error::Error>> {
+fn get_pin(pin_number: u8) -> Result<Pin, Box<dyn std::error::Error>> {
     match Gpio::new() {
         Ok(gpio) => match gpio.get(pin_number) {
-            Ok(pin) => return Ok(pin.into_input()),
-            Err(e) => {
-                info!("Error: {}", e);
-                return Err(Box::from(e));
-            }
-        },
-        Err(e) => {
-            info!("Error: {}", e);
-            return Err(Box::from(e));
-        }
-    };
-}
-
-fn get_pin_as_output(pin_number: u8) -> Result<OutputPin, Box<dyn std::error::Error>> {
-    match Gpio::new() {
-        Ok(gpio) => match gpio.get(pin_number) {
-            Ok(pin) => return Ok(pin.into_output()),
+            Ok(pin) => return Ok(pin),
             Err(e) => {
                 info!("Error: {}", e);
                 return Err(Box::from(e));
@@ -196,12 +178,12 @@ fn convert_data_to_float(data: u16) -> f32 {
     result
 }
 
-fn read_data(array: &mut [u8; 5]) -> Result<(), Box<dyn std::error::Error>> {
+fn read_data(array: &mut [u8; 5], pin: &InputPin) -> Result<(), Box<dyn std::error::Error>> {
     info!("reading sensor data");
 
     for index in 0..array.len() {
         info!("reading byte {}", index);
-        array[index] = read_byte()?;
+        array[index] = read_byte(pin)?;
         if array[index] == ERROR_TIMEOUT {
             return Err(Box::from("Timeout"));
         }
