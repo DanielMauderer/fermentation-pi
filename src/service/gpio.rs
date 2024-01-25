@@ -1,5 +1,5 @@
 use rocket::form::error;
-use rppal::gpio::{Gpio, InputPin, OutputPin, Pin};
+use rppal::gpio::{Gpio, InputPin, IoPin, Mode, OutputPin, Pin};
 use std::sync::Mutex;
 use std::thread;
 
@@ -23,14 +23,11 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let _unused = SENSOR_LOCK.lock().unwrap();
     let mut array: [u8; 5] = [0; 5];
     turn_off_heating()?;
-    start_signal()?;
-    turn_on_heating()?;
-    let in_pin = &get_pin(SENSOR_PIN)?.into_input();
-    turn_off_heating()?;
-    ready_sensor(in_pin)?;
-    turn_on_heating()?;
-    read_data(&mut array, in_pin)?;
-    turn_off_heating()?;
+    let mut pin: IoPin = get_pin(SENSOR_PIN)?.into_io(rppal::gpio::Mode::Output);
+    start_signal(&mut pin)?;
+    pin.set_mode(Mode::Input);
+    ready_sensor(&pin)?;
+    read_data(&mut array, &pin)?;
 
     return Ok((
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
@@ -38,7 +35,14 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     ));
 }
 
-fn ready_sensor(pin: &InputPin) -> Result<(), Box<dyn std::error::Error>> {
+fn start_signal(pin: &mut IoPin) -> Result<(), Box<dyn std::error::Error>> {
+    pin.set_low();
+    thread::sleep(std::time::Duration::from_millis(18));
+    pin.set_high();
+    Ok(())
+}
+
+fn ready_sensor(pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     let timeout_start = std::time::Instant::now();
     info!("waiting for sensor ready");
 
@@ -132,16 +136,7 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
-    info!("sending start signal");
-    let mut pin = get_pin(SENSOR_PIN)?.into_output();
-    pin.set_low();
-    thread::sleep(std::time::Duration::from_millis(18));
-    pin.set_high();
-    Ok(())
-}
-
-fn read_byte(pin: &InputPin) -> Result<u8, Box<dyn std::error::Error>> {
+fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
     let mut timeout_start;
     for i in 0..8 {
@@ -182,7 +177,7 @@ fn convert_data_to_float(data: u16) -> f32 {
     result
 }
 
-fn read_data(array: &mut [u8; 5], pin: &InputPin) -> Result<(), Box<dyn std::error::Error>> {
+fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
     info!("reading sensor data");
 
     for index in 0..array.len() {
