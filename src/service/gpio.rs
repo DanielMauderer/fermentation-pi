@@ -139,15 +139,14 @@ fn start_signal() -> Result<(), Box<dyn std::error::Error>> {
 
 fn read_byte(pin: &InputPin) -> Result<u8, Box<dyn std::error::Error>> {
     let mut value = 0;
-    let mut timeout_start = std::time::Instant::now();
+    let mut timeout_start;
     for i in 0..8 {
         turn_on_heating()?;
         info!("reading bit {}", i);
         while pin.is_low() {}
-        while pin.is_high() {}
         timeout_start = std::time::Instant::now();
-        while pin.is_low() {}
-        if timeout_start.elapsed().as_nanos() > 30 {
+        while pin.is_high() {}
+        if timeout_start.elapsed().as_micros() > 30 {
             value |= 1 << (7 - i);
         }
         turn_off_heating()?;
