@@ -15,6 +15,13 @@ pub mod project {
         pub created_at: u64,
         pub start_at: Option<u64>,
         pub endend_at: Option<u64>,
+        pub settings: Settings,
+    }
+
+    #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+    pub struct Settings {
+        pub hum: f32,
+        pub temp: f32,
     }
 
     /* read project json path: db/projects.json */
@@ -73,6 +80,15 @@ pub mod project {
     }
 
     pub fn start_project(id: u32, start_at: u64) -> Result<(), Box<dyn std::error::Error>> {
+        match get_active_project() {
+            Ok(project) => {
+                if project.id != id {
+                    return Err(Box::from("Another project is already running"));
+                }
+            }
+            Err(_) => {}
+        }
+
         write_project(Some(id), |project| {
             project.start_at = Some(start_at);
             Ok(())
@@ -94,13 +110,15 @@ pub mod project {
         }
     }
 
-    fn check_if_project_is_running(projects: &Vec<Project>) -> bool {
-        for project in projects {
-            if project.start_at.is_some() && project.endend_at.is_none() {
-                return true;
-            }
+    pub fn get_active_project() -> Result<Project, Box<dyn std::error::Error>> {
+        let projects = read_projects()?;
+        match projects
+            .iter()
+            .find(|&p| p.start_at.is_some() && p.endend_at.is_none())
+        {
+            Some(project) => Ok(project.clone()),
+            None => return Err(Box::from("Project not found")),
         }
-        false
     }
 
     fn write_project(
@@ -132,6 +150,10 @@ pub mod project {
             created_at,
             start_at: None,
             endend_at: None,
+            settings: Settings {
+                hum: 75.0,
+                temp: 30.0,
+            },
         };
         f(&mut project)?;
         projects.push(project.clone());

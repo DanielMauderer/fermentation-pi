@@ -1,7 +1,10 @@
 use std::thread;
 
 use crate::service::{
-    database::sensor::{add_datapoint, HistoricSensorData},
+    database::{
+        project::get_active_project,
+        sensor::{add_datapoint, HistoricSensorData},
+    },
     sensor::get_sensor_data,
 };
 use nokhwa::{Camera, CameraFormat, FrameFormat};
@@ -48,7 +51,11 @@ fn take_webcam_image(camera: &mut Camera) -> Result<(), Box<dyn std::error::Erro
             return Err(Box::from(e));
         }
     };
-    let path = format!("./webcam/0/{}.png", chrono::Utc::now().timestamp());
+    let path = format!(
+        "./webcam/{}/{}.png",
+        get_active_project()?.id,
+        chrono::Utc::now().timestamp()
+    );
     match frame.save_with_format(path, image::ImageFormat::Png) {
         Ok(_) => Ok(()),
         Err(e) => {
