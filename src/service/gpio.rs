@@ -18,9 +18,9 @@ const LED1_PIN: u8 = 17;
 const LED2_PIN: u8 = 3;
 const LED3_PIN: u8 = 4;
 const TIMEOUT_DURATION: u128 = 300;
-const ERROR_TIMEOUT: u8 = 253;
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
+    let _lock = SENSOR_LOCK.lock()?;
     let mut array: [u8; 5] = [0; 5];
     let mut pin: IoPin = get_pin(SENSOR_PIN)?.into_io(rppal::gpio::Mode::Output);
     start_signal(&mut pin)?;
@@ -32,6 +32,80 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
         convert_data_to_float(((array[2] as u16) << 8) | array[3] as u16),
     ));
+}
+
+pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
+    let _lock = HEATING_LOCK.lock().unwrap();
+    let mut pin = get_pin(HEATING_PIN)?.into_output();
+    pin.set_high();
+    Ok(())
+}
+
+pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
+    let _lock = HEATING_LOCK.lock().unwrap();
+    let mut pin = get_pin(HEATING_PIN)?.into_output();
+    pin.set_low();
+    Ok(())
+}
+
+pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
+    let _lock = HUMIDIFIER_LOCK.lock().unwrap();
+    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
+    pin.set_high();
+    Ok(())
+}
+
+pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
+    let _lock = HUMIDIFIER_LOCK.lock().unwrap();
+    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
+    pin.set_low();
+    Ok(())
+}
+
+pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
+    let mut pin: OutputPin;
+    match led_index {
+        1 => {
+            pin = {
+                let _lock = LED1_LOCK.lock().unwrap();
+                get_pin(LED1_PIN)?.into_output()
+            }
+        }
+        2 => {
+            let _lock = LED2_LOCK.lock().unwrap();
+            pin = get_pin(LED2_PIN)?.into_output()
+        }
+        3 => {
+            let _lock = LED3_LOCK.lock().unwrap();
+            pin = get_pin(LED3_PIN)?.into_output()
+        }
+        _ => return Err(Box::from("Index")),
+    };
+    pin.set_high();
+    Ok(())
+}
+
+pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
+    let mut pin: OutputPin;
+    match led_index {
+        1 => {
+            pin = {
+                let _lock = LED1_LOCK.lock()?;
+                get_pin(LED1_PIN)?.into_output()
+            }
+        }
+        2 => {
+            let _lock = LED2_LOCK.lock().unwrap();
+            pin = get_pin(LED2_PIN)?.into_output()
+        }
+        3 => {
+            let _lock = LED3_LOCK.lock().unwrap();
+            pin = get_pin(LED3_PIN)?.into_output()
+        }
+        _ => return Err(Box::from("Index")),
+    };
+    pin.set_low();
+    Ok(())
 }
 
 fn start_signal(pin: &mut IoPin) -> Result<(), Box<dyn std::error::Error>> {
@@ -52,86 +126,6 @@ fn ready_sensor(pin: &IoPin) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     while pin.is_low() {}
-    Ok(())
-}
-
-pub fn read_sensor_data_rand() -> Result<(f32, f32), Box<dyn std::error::Error>> {
-    let rand1 = rand::random::<f32>();
-    let rand2 = rand::random::<f32>();
-    Ok((rand1, rand2))
-}
-
-pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let _unused = HEATING_LOCK.lock().unwrap();
-    let mut pin = get_pin(HEATING_PIN)?.into_output();
-    pin.set_high();
-    Ok(())
-}
-
-pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let _unused = HEATING_LOCK.lock().unwrap();
-    let mut pin = get_pin(HEATING_PIN)?.into_output();
-    pin.set_low();
-    Ok(())
-}
-
-pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let _unused = HUMIDIFIER_LOCK.lock().unwrap();
-    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
-    pin.set_high();
-    Ok(())
-}
-
-pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let _unused = HUMIDIFIER_LOCK.lock().unwrap();
-    let mut pin = get_pin(HUMIDIFIER_PIN)?.into_output();
-    pin.set_low();
-    Ok(())
-}
-
-pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin: OutputPin;
-    match led_index {
-        1 => {
-            pin = {
-                let _unused = LED1_LOCK.lock().unwrap();
-                get_pin(LED1_PIN)?.into_output()
-            }
-        }
-        2 => {
-            let _unused = LED2_LOCK.lock().unwrap();
-            pin = get_pin(LED2_PIN)?.into_output()
-        }
-        3 => {
-            let _unused = LED3_LOCK.lock().unwrap();
-            pin = get_pin(LED3_PIN)?.into_output()
-        }
-        _ => return Err(Box::from("Index")),
-    };
-    pin.set_high();
-    Ok(())
-}
-
-pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin: OutputPin;
-    match led_index {
-        1 => {
-            pin = {
-                let _unused = LED1_LOCK.lock().unwrap();
-                get_pin(LED1_PIN)?.into_output()
-            }
-        }
-        2 => {
-            let _unused = LED2_LOCK.lock().unwrap();
-            pin = get_pin(LED2_PIN)?.into_output()
-        }
-        3 => {
-            let _unused = LED3_LOCK.lock().unwrap();
-            pin = get_pin(LED3_PIN)?.into_output()
-        }
-        _ => return Err(Box::from("Index")),
-    };
-    pin.set_low();
     Ok(())
 }
 
