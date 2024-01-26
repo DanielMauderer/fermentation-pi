@@ -12,7 +12,7 @@ pub fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
             }
             continue;
         }
-        let (temperature, humidity) = sensor_result.unwrap();
+        let (humidity, temperature) = sensor_result.unwrap();
         return Ok(SensorData {
             temp: temperature,
             hum: humidity,

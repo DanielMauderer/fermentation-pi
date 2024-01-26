@@ -1,6 +1,4 @@
-use rocket::fairing::Info;
-use rocket::form::error;
-use rppal::gpio::{Gpio, InputPin, IoPin, Mode, OutputPin, Pin};
+use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
 use std::sync::Mutex;
 use std::thread;
 

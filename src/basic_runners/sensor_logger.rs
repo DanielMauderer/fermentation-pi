@@ -26,7 +26,7 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
     loop {
-        //take_sensor_data()?;
+        take_sensor_data()?;
         let _ = take_webcam_image(&mut camera)?;
         thread::sleep(std::time::Duration::from_secs(1));
     }
