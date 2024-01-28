@@ -139,7 +139,7 @@ fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
     };
 
     match Gpio::new() {
-        Ok(gpio) => match gpio.get(*_lock) {
+        Ok(gpio) => match gpio.get(pin as u8) {
             Ok(pin) => return Ok(pin),
             Err(e) => {
                 error!("Error: {}", e);
