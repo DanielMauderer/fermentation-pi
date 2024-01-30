@@ -1,6 +1,6 @@
 use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
 use std::sync::Mutex;
-use std::{pin, thread};
+use std::thread;
 
 static HEATING_LOCK: Mutex<u8> = Mutex::new(0);
 static HUMIDIFIER_LOCK: Mutex<u8> = Mutex::new(0);

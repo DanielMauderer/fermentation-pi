@@ -18,6 +18,8 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
         let hum_output = hum_pid.next_control_output(sensor_data.hum).output;
         let temp_output = temp_pid.next_control_output(sensor_data.temp).output;
 
+        print!("Hum: {}, Temp: {}", hum_output, temp_output);
+
         if hum_output > 0.0 {
             turn_on_humidifier()?;
         }
