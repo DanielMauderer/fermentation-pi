@@ -142,24 +142,21 @@ fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
         Ok(gpio) => match gpio.get(pin as u8) {
             Ok(pin) => return Ok(pin),
             Err(e) => {
-                error!("Error: {}", e);
                 return Err(Box::from(e));
             }
         },
         Err(e) => {
-            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     };
 }
 
-fn get_pin_as_output(pinType: PinType) -> Result<OutputPin, Box<dyn std::error::Error>> {
-    let mut pin = get_pin(pinType)?.into_output();
+fn get_pin_as_output(pin_type: PinType) -> Result<OutputPin, Box<dyn std::error::Error>> {
+    let mut pin = get_pin(pin_type)?.into_output();
     pin.set_reset_on_drop(false);
     Ok(pin)
 }
 
-/* add floating point to a u16 3840 -> 38.40 */
 fn convert_data_to_float(data: u16) -> f32 {
     let mut result = data as f32;
     result /= 10.0;

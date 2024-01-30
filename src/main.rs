@@ -28,11 +28,13 @@ pub mod basic_runners {
 #[launch]
 fn rocket() -> _ {
     let _ = thread::spawn(|| {
-        let _ = basic_runners::manage_climate::entry_loop();
+        let error = basic_runners::manage_climate::entry_loop().err().unwrap();
+        error!("Error: {}", error);
     });
 
     let _ = thread::spawn(|| {
-        let _ = basic_runners::sensor_logger::entry_loop();
+        let error = basic_runners::sensor_logger::entry_loop().err().unwrap();
+        error!("Error: {}", error);
     });
 
     let mut index_routes = routes![route::index::index, route::index::files];
