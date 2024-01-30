@@ -27,9 +27,10 @@ pub mod basic_runners {
 
 #[launch]
 fn rocket() -> _ {
-    let _ = thread::spawn(|| {
-        let error = basic_runners::manage_climate::entry_loop().err().unwrap();
-        error!("manage_climate shut down with error: {}", error);
+    let _ = thread::spawn(|| async {
+        let error = basic_runners::manage_climate::entry_loop().await;
+        let e = error.err().unwrap();
+        error!("manage_climate shut down with error: {}", e);
     });
 
     let _ = thread::spawn(|| {

@@ -3,7 +3,7 @@ use pid::Pid;
 use std::{thread, time::Duration};
 
 use crate::service::{
-    database::{project::get_active_project, sensor::SensorData},
+    database::project::get_active_project,
     gpio::{turn_off_heating, turn_off_humidifier, turn_on_heating, turn_on_humidifier},
     sensor::get_sensor_data,
 };
