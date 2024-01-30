@@ -1,6 +1,6 @@
 use async_std::task;
 use pid::Pid;
-use std::time::Duration;
+use std::{thread, time::Duration};
 
 use crate::service::{
     database::project::get_active_project,
@@ -37,5 +37,6 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
             }
             task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
+        thread::sleep(std::time::Duration::from_secs(1));
     }
 }
