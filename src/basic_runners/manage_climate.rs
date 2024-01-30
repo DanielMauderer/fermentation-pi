@@ -14,10 +14,13 @@ pub async fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     hum_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
     temp_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
-
+    warn!("1");
     let mut sensor_data: SensorData = get_sensor_data().await?;
+    warn!("1");
+
     loop {
         let sensor_data_task = get_sensor_data();
+        warn!("started task");
         let next_control_output_temp = hum_pid.next_control_output(sensor_data.hum);
         warn!("Next control output temp: {:?}", next_control_output_temp);
         let next_control_output_hum = temp_pid.next_control_output(sensor_data.temp);
@@ -45,6 +48,9 @@ pub async fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
             task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
         thread::sleep(std::time::Duration::from_secs(1));
+        warn!("awaiting task");
+
         sensor_data = sensor_data_task.await?;
+        warn!("awaiting task done");
     }
 }
