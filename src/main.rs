@@ -52,7 +52,8 @@ fn rocket() -> _ {
                 route::project::update,
                 route::project::delete,
                 route::project::start,
-                route::project::end
+                route::project::end,
+                route::project::set_settings
             ],
         )
         .mount(

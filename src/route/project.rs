@@ -15,8 +15,8 @@ pub struct PutRequest {
 }
 
 use crate::service::database::project::{
-    create_new_project, delete_project, end_project, read_project, read_projects, start_project,
-    update_project, Project,
+    create_new_project, delete_project, end_project, read_project, read_projects,
+    set_project_settings, start_project, update_project, Project, Settings,
 };
 use ::serde::Deserialize;
 use rocket::serde::json::Json;
@@ -70,4 +70,9 @@ pub fn end(id: u32) {
         Ok(end_at) => end_project(id, end_at.as_secs()),
         Err(_) => panic!("SystemTime before UNIX EPOCH!"),
     };
+}
+
+#[post("/<id>/settings", format = "json", data = "<settings>")]
+pub fn set_settings(id: u32, settings: Json<Settings>) {
+    let _ = set_project_settings(id, settings.0);
 }

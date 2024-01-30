@@ -110,6 +110,20 @@ pub mod project {
         }
     }
 
+    pub fn set_project_settings(
+        id: u32,
+        settings: Settings,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut projects = read_projects()?;
+        match projects.iter_mut().find(|p| p.id == id) {
+            Some(project) => project.settings = settings,
+            None => return Err(Box::from("Project not found")),
+        };
+        let mut file = File::create("./db/projects.json")?;
+        file.write_all(serde_json::to_string(&projects)?.as_bytes())?;
+        Ok(())
+    }
+
     pub fn get_active_project() -> Result<Project, Box<dyn std::error::Error>> {
         let projects = read_projects()?;
         match projects
