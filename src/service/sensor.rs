@@ -1,7 +1,7 @@
 use super::{database::sensor::SensorData, gpio::read_sensor_data};
 const MAX_RETRIES: u8 = 5;
 
-pub fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
+pub async fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
     let mut retries = 0;
     loop {
         let sensor_result = read_sensor_data();

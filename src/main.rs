@@ -33,9 +33,10 @@ fn rocket() -> _ {
         error!("manage_climate shut down with error: {}", e);
     });
 
-    let _ = thread::spawn(|| {
-        let error = basic_runners::sensor_logger::entry_loop().err().unwrap();
-        error!("sensor_logger shut down with error: {}", error);
+    let _ = thread::spawn(|| async {
+        let error = basic_runners::sensor_logger::entry_loop().await;
+        let e = error.err().unwrap();
+        error!("sensor_logger shut down with error: {}", e);
     });
 
     let mut index_routes = routes![route::index::index, route::index::files];
