@@ -15,8 +15,12 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let sensor_data = crate::service::sensor::get_sensor_data()?;
 
-        let hum_on_time = hum_pid.next_control_output(sensor_data.hum).output / 100.0;
-        let temp_on_time = temp_pid.next_control_output(sensor_data.temp).output / 100.0;
+        let next_control_output_temp = hum_pid.next_control_output(sensor_data.hum);
+        warn!("Next control output temp: {:?}", next_control_output_temp);
+        let next_control_output_hum = temp_pid.next_control_output(sensor_data.temp);
+        warn!("Next control output hum: {:?}", next_control_output_hum);
+        let hum_on_time = next_control_output_temp.output / 100.0;
+        let temp_on_time = next_control_output_hum.output / 100.0;
 
         warn!("Hum: {}, Temp: {}", sensor_data.hum, sensor_data.temp);
         warn!("Hum_on: {}, Temp_on: {}", hum_on_time, temp_on_time);
