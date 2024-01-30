@@ -15,27 +15,27 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         let sensor_data = crate::service::sensor::get_sensor_data()?;
 
-        let hum_output = hum_pid.next_control_output(sensor_data.hum).output;
-        let temp_output = temp_pid.next_control_output(sensor_data.temp).output;
+        let hum_on_time = hum_pid.next_control_output(sensor_data.hum).output / 100.0;
+        let temp_on_time = temp_pid.next_control_output(sensor_data.temp).output / 100.0;
 
-        print!("Hum: {}, Temp: {}", hum_output, temp_output);
-
-        if hum_output > 0.0 {
-            turn_on_humidifier()?;
-        }
-        if temp_output > 0.0 {
-            turn_on_heating()?;
-        }
+        warn!("Hum: {}, Temp: {}", hum_on_time, temp_on_time);
 
         task::spawn(async move {
-            let sleep_time = 1.0 / hum_output.abs();
-            task::sleep(Duration::from_secs(sleep_time as u64)).await;
-            turn_off_heating().unwrap();
+            if hum_on_time > 0.0 {
+                turn_on_humidifier().unwrap();
+                task::sleep(Duration::from_secs(hum_on_time as u64)).await;
+                turn_off_humidifier().unwrap();
+            }
+            task::sleep(Duration::from_secs(1 - hum_on_time as u64)).await;
         });
+
         task::spawn(async move {
-            let sleep_time = 1.0 / temp_output.abs();
-            task::sleep(Duration::from_secs(sleep_time as u64)).await;
-            turn_off_humidifier().unwrap();
+            if temp_on_time > 0.0 {
+                turn_on_heating().unwrap();
+                task::sleep(Duration::from_secs(temp_on_time as u64)).await;
+                turn_off_heating().unwrap();
+            }
+            task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
     }
 }

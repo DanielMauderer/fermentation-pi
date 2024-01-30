@@ -29,12 +29,12 @@ pub mod basic_runners {
 fn rocket() -> _ {
     let _ = thread::spawn(|| {
         let error = basic_runners::manage_climate::entry_loop().err().unwrap();
-        error!("Error: {}", error);
+        error!("manage_climate shut down with error: {}", error);
     });
 
     let _ = thread::spawn(|| {
         let error = basic_runners::sensor_logger::entry_loop().err().unwrap();
-        error!("Error: {}", error);
+        error!("sensor_logger shut down with error: {}", error);
     });
 
     let mut index_routes = routes![route::index::index, route::index::files];
