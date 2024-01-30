@@ -27,9 +27,9 @@ pub mod basic_runners {
 
 #[launch]
 fn rocket() -> _ {
-    let _ = thread::spawn(|| async {
-        let error = basic_runners::sensor_logger::entry_loop();
-    });
+    //let _ = thread::spawn(|| async {
+    //    let error = basic_runners::sensor_logger::entry_loop();
+    //});
     let _ = thread::spawn(|| async {
         let error = basic_runners::manage_climate::entry_loop().await;
         let e = error.err().unwrap();
