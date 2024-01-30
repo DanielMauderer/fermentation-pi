@@ -1,6 +1,6 @@
 use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
 use std::sync::Mutex;
-use std::thread;
+use std::{pin, thread};
 
 static HEATING_LOCK: Mutex<u8> = Mutex::new(0);
 static HUMIDIFIER_LOCK: Mutex<u8> = Mutex::new(0);
@@ -35,25 +35,25 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 }
 
 pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin = get_pin(PinType::HeatingPin)?.into_output();
+    let mut pin = get_pin_as_output(PinType::HeatingPin)?;
     pin.set_high();
     Ok(())
 }
 
 pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin = get_pin(PinType::HeatingPin)?.into_output();
+    let mut pin = get_pin_as_output(PinType::HeatingPin)?;
     pin.set_low();
     Ok(())
 }
 
 pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin = get_pin(PinType::HumidifierPin)?.into_output();
+    let mut pin = get_pin_as_output(PinType::HumidifierPin)?;
     pin.set_high();
     Ok(())
 }
 
 pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin = get_pin(PinType::HumidifierPin)?.into_output();
+    let mut pin = get_pin_as_output(PinType::HumidifierPin)?;
     pin.set_low();
     Ok(())
 }
@@ -61,9 +61,9 @@ pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
 pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     let mut pin: OutputPin;
     match led_index {
-        1 => pin = get_pin(PinType::Led1Pin)?.into_output(),
-        2 => pin = get_pin(PinType::Led2Pin)?.into_output(),
-        3 => pin = get_pin(PinType::Led3Pin)?.into_output(),
+        1 => pin = get_pin_as_output(PinType::Led1Pin)?,
+        2 => pin = get_pin_as_output(PinType::Led2Pin)?,
+        3 => pin = get_pin_as_output(PinType::Led3Pin)?,
         _ => return Err(Box::from("Index")),
     };
     pin.set_high();
@@ -73,9 +73,9 @@ pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
 pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     let mut pin: OutputPin;
     match led_index {
-        1 => pin = get_pin(PinType::Led1Pin)?.into_output(),
-        2 => pin = get_pin(PinType::Led2Pin)?.into_output(),
-        3 => pin = get_pin(PinType::Led3Pin)?.into_output(),
+        1 => pin = get_pin_as_output(PinType::Led1Pin)?,
+        2 => pin = get_pin_as_output(PinType::Led2Pin)?,
+        3 => pin = get_pin_as_output(PinType::Led3Pin)?,
         _ => return Err(Box::from("Index")),
     };
     pin.set_low();
@@ -151,6 +151,12 @@ fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
             return Err(Box::from(e));
         }
     };
+}
+
+fn get_pin_as_output(pinType: PinType) -> Result<OutputPin, Box<dyn std::error::Error>> {
+    let mut pin = get_pin(pinType)?.into_output();
+    pin.set_reset_on_drop(false);
+    Ok(pin)
 }
 
 /* add floating point to a u16 3840 -> 38.40 */
