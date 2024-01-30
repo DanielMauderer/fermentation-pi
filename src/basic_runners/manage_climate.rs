@@ -18,7 +18,8 @@ pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
         let hum_on_time = hum_pid.next_control_output(sensor_data.hum).output / 100.0;
         let temp_on_time = temp_pid.next_control_output(sensor_data.temp).output / 100.0;
 
-        warn!("Hum: {}, Temp: {}", hum_on_time, temp_on_time);
+        warn!("Hum: {}, Temp: {}", sensor_data.hum, sensor_data.temp);
+        warn!("Hum_on: {}, Temp_on: {}", hum_on_time, temp_on_time);
 
         task::spawn(async move {
             if hum_on_time > 0.0 {
