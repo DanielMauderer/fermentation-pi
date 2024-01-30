@@ -10,7 +10,9 @@ use crate::service::{
 pub fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
     let project = get_active_project()?;
     let mut hum_pid: Pid<f32> = Pid::new(project.settings.hum, 100.0);
+    hum_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
+    temp_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
 
     loop {
         let sensor_data = crate::service::sensor::get_sensor_data()?;
