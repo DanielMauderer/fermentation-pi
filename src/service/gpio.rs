@@ -12,10 +12,10 @@ static SENSOR_LOCK: Mutex<u8> = Mutex::new(0);
 #[repr(u8)]
 enum PinType {
     HeatingPin = 2,
-    Led2Pin = 3,
+    HumidifierPin = 3,
     Led3Pin = 4,
     Led1Pin = 17,
-    HumidifierPin = 22,
+    Led2Pin = 22,
     SensorPin = 27,
 }
 const TIMEOUT_DURATION: u128 = 300;
