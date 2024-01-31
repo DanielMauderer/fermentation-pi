@@ -33,6 +33,8 @@ fn rocket() -> _ {
     let _ = thread::spawn(|| async {
         warn!("w1");
         let error = basic_runners::manage_climate::entry_loop().await;
+        warn!("ww1");
+
         let e = error.err().unwrap();
         error!("manage_climate shut down with error: {}", e);
     });
