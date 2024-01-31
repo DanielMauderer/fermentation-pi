@@ -9,36 +9,50 @@ use crate::service::{
 };
 use nokhwa::{Camera, CameraFormat, FrameFormat};
 
-pub async fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
+pub fn entry_loop() {
     let mut camera = match Camera::new(
-        0,                                                                // index
+        0,
         Some(CameraFormat::new_from(1920, 1080, FrameFormat::MJPEG, 30)), // format
     ) {
         Ok(camera) => camera,
         Err(e) => {
-            println!("Error: {}", e);
-            return Err(Box::from(e));
+            error!("Error: {}", e);
+            return;
         }
     };
     // open stream
     match camera.open_stream() {
         Ok(_) => {}
         Err(e) => {
-            println!("Error: {}", e);
-            return Err(Box::from(e));
+            error!("Error: {}", e);
+            return;
         }
     };
     loop {
-        take_sensor_data().await?;
-        let _ = take_webcam_image(&mut camera)?;
+        let sensor_task = take_sensor_data();
+        let webcam_error = take_webcam_image(&mut camera).err();
+        match sensor_task {
+            Ok(_) => {}
+            Err(e) => {
+                error!("Error: {}", e);
+                return;
+            }
+        }
+        match webcam_error {
+            Some(e) => {
+                error!("Error: {}", e);
+                return;
+            }
+            None => {}
+        }
         thread::sleep(std::time::Duration::from_secs(1));
     }
 }
 
-async fn take_sensor_data() -> Result<(), Box<dyn std::error::Error>> {
+fn take_sensor_data() -> Result<(), Box<dyn std::error::Error>> {
     let data = HistoricSensorData {
         time: chrono::Utc::now().timestamp() as u64,
-        data: get_sensor_data().await?,
+        data: get_sensor_data()?,
     };
     add_datapoint(data)
 }
@@ -47,7 +61,7 @@ fn take_webcam_image(camera: &mut Camera) -> Result<(), Box<dyn std::error::Erro
     let frame = match camera.frame() {
         Ok(frame) => frame,
         Err(e) => {
-            println!("Error: {}", e);
+            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     };
@@ -59,7 +73,7 @@ fn take_webcam_image(camera: &mut Camera) -> Result<(), Box<dyn std::error::Erro
     match frame.save_with_format(path, image::ImageFormat::Png) {
         Ok(_) => Ok(()),
         Err(e) => {
-            println!("Error: {}", e);
+            error!("Error: {}", e);
             return Err(Box::from(e));
         }
     }

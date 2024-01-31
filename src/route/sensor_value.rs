@@ -14,10 +14,10 @@ pub fn get_historic(start_ticks: u64, end_ticks: u64) -> Json<Option<Vec<Histori
 
 #[get("/")]
 pub async fn get() -> Json<Option<SensorData>> {
-    match get_sensor_data().await {
+    match get_sensor_data() {
         Ok(sensor) => Json(Some(sensor)),
         Err(e) => {
-            println!("Error: {}", e);
+            error!("Error: {}", e);
             Json(None)
         }
     }

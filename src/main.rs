@@ -1,3 +1,4 @@
+use rocket::futures::FutureExt;
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use std::thread;
 
@@ -26,19 +27,9 @@ pub mod basic_runners {
 }
 
 #[launch]
-fn rocket() -> _ {
-    //let _ = thread::spawn(|| async {
-    //    let error = basic_runners::sensor_logger::entry_loop();
-    //});
-    let _ = thread::spawn(|| async {
-        warn!("w1");
-        let error = basic_runners::manage_climate::entry_loop().await;
-        warn!("ww1");
-
-        let e = error.err().unwrap();
-        error!("manage_climate shut down with error: {}", e);
-    });
-
+async fn rocket() -> _ {
+    thread::spawn(|| basic_runners::sensor_logger::entry_loop());
+    thread::spawn(|| basic_runners::manage_climate::entry_loop());
     let mut index_routes = routes![route::index::index, route::index::files];
     index_routes[1].rank = 2;
     let cors = CorsOptions::default().allowed_origins(AllowedOrigins::all());
