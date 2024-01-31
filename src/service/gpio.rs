@@ -129,15 +129,6 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
 }
 
 fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
-    let _lock = match pin {
-        PinType::HeatingPin => HEATING_LOCK.lock()?,
-        PinType::HumidifierPin => HUMIDIFIER_LOCK.lock()?,
-        PinType::Led1Pin => LED1_LOCK.lock()?,
-        PinType::Led2Pin => LED2_LOCK.lock()?,
-        PinType::Led3Pin => LED3_LOCK.lock()?,
-        PinType::SensorPin => SENSOR_LOCK.lock()?,
-    };
-
     match Gpio::new() {
         Ok(gpio) => match gpio.get(pin as u8) {
             Ok(pin) => return Ok(pin),
