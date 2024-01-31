@@ -36,7 +36,8 @@ pub fn entry_loop() {
         let next_control_output_hum = temp_pid.next_control_output(sensor_data.temp);
         let hum_on_time = next_control_output_temp.output / 100.0;
         let temp_on_time = next_control_output_hum.output / 100.0;
-
+        warn!("hum_on_time: {}", hum_on_time);
+        warn!("temp_on_time: {}", temp_on_time);
         task::spawn(async move {
             if hum_on_time > 0.0 {
                 turn_on_humidifier().unwrap();
