@@ -40,14 +40,14 @@ pub fn entry_loop() {
         warn!("temp_on_time: {}", temp_on_time);
         task::spawn(async move {
             if hum_on_time > 0.0 {
-                match turn_off_humidifier() {
+                match turn_on_humidifier() {
                     Ok(_) => {}
                     Err(e) => {
                         error!("Error: {}", e);
                     }
                 };
                 task::sleep(Duration::from_secs(hum_on_time as u64)).await;
-                match turn_on_humidifier() {
+                match turn_off_humidifier() {
                     Ok(_) => {}
                     Err(e) => {
                         error!("Error: {}", e);
@@ -67,14 +67,14 @@ pub fn entry_loop() {
 
         task::spawn(async move {
             if temp_on_time > 0.0 {
-                match turn_off_heating() {
+                match turn_on_heating() {
                     Ok(_) => {}
                     Err(e) => {
                         error!("Error: {}", e);
                     }
                 }
                 task::sleep(Duration::from_secs(temp_on_time as u64)).await;
-                match turn_on_heating() {
+                match turn_off_heating() {
                     Ok(_) => {}
                     Err(e) => {
                         error!("Error: {}", e);
