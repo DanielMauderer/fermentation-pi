@@ -40,33 +40,49 @@ pub fn entry_loop() {
         warn!("temp_on_time: {}", temp_on_time);
         task::spawn(async move {
             if hum_on_time > 0.0 {
-                turn_off_humidifier().unwrap();
+                match turn_off_humidifier() {
+                    Ok(_) => {}
+                    Err(e) => {
+                        error!("Error: {}", e);
+                    }
+                };
                 task::sleep(Duration::from_secs(hum_on_time as u64)).await;
-                turn_on_humidifier().unwrap();
+                match turn_on_humidifier() {
+                    Ok(_) => {}
+                    Err(e) => {
+                        error!("Error: {}", e);
+                    }
+                };
             }
             task::sleep(Duration::from_secs(1 - hum_on_time as u64)).await;
         });
 
-        task::spawn(async move {
-            sensor_data = match get_sensor_data() {
-                Ok(sensor_data) => sensor_data,
-                Err(e) => {
-                    error!("Error: {}", e);
-                    return;
-                }
-            };
-        });
+        sensor_data = match get_sensor_data() {
+            Ok(sensor_data) => sensor_data,
+            Err(e) => {
+                error!("Error: {}", e);
+                return;
+            }
+        };
 
         task::spawn(async move {
             if temp_on_time > 0.0 {
-                turn_off_heating().unwrap();
+                match turn_off_heating() {
+                    Ok(_) => {}
+                    Err(e) => {
+                        error!("Error: {}", e);
+                    }
+                }
                 task::sleep(Duration::from_secs(temp_on_time as u64)).await;
-                turn_on_heating().unwrap();
+                match turn_on_heating() {
+                    Ok(_) => {}
+                    Err(e) => {
+                        error!("Error: {}", e);
+                    }
+                };
             }
             task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
         thread::sleep(std::time::Duration::from_secs(1));
-        error!("awaiting task");
-        error!("awaiting task done");
     }
 }
