@@ -9,11 +9,15 @@ use crate::service::{
 };
 
 pub async fn entry_loop() -> Result<(), Box<dyn std::error::Error>> {
+    warn!("w2");
+
     let project = get_active_project()?;
     let mut hum_pid: Pid<f32> = Pid::new(project.settings.hum, 100.0);
     hum_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
     temp_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
+    warn!("w3");
+
     warn!("1");
     let mut sensor_data: SensorData = get_sensor_data().await?;
     warn!("1");
