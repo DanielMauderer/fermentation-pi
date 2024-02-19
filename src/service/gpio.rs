@@ -1,13 +1,5 @@
 use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
-use std::sync::Mutex;
 use std::thread;
-
-static HEATING_LOCK: Mutex<u8> = Mutex::new(0);
-static HUMIDIFIER_LOCK: Mutex<u8> = Mutex::new(0);
-static LED1_LOCK: Mutex<u8> = Mutex::new(0);
-static LED2_LOCK: Mutex<u8> = Mutex::new(0);
-static LED3_LOCK: Mutex<u8> = Mutex::new(0);
-static SENSOR_LOCK: Mutex<u8> = Mutex::new(0);
 
 #[repr(u8)]
 enum PinType {

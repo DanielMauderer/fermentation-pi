@@ -1,4 +1,3 @@
-use rocket::futures::FutureExt;
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use std::thread;
 
