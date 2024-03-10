@@ -1,3 +1,5 @@
+use image::error;
+
 use super::{database::sensor::SensorData, gpio::read_sensor_data};
 const MAX_RETRIES: u8 = 5;
 
@@ -8,7 +10,8 @@ pub fn get_sensor_data() -> Result<SensorData, Box<dyn std::error::Error>> {
         if sensor_result.is_err() {
             retries += 1;
             if retries >= MAX_RETRIES {
-                return Err(Box::from("Max retries exceeded"));
+                let error = sensor_result.err().unwrap();
+                return Err(Box::from(format!("Max retries exceeded: {error}")));
             }
             continue;
         }
