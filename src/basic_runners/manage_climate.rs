@@ -61,7 +61,7 @@ pub fn entry_loop() {
             Ok(sensor_data) => sensor_data,
             Err(e) => {
                 error!("Error: {}", e);
-                return;
+                continue;
             }
         };
 
