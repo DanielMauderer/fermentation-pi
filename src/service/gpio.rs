@@ -3,12 +3,13 @@ use std::thread;
 
 #[repr(u8)]
 enum PinType {
-    HeatingPin = 2,
-    HumidifierPin = 3,
-    Led3Pin = 4,
-    Led1Pin = 17,
-    Led2Pin = 22,
-    SensorPin = 27,
+    HeatingPin = 4,
+    HumidifierPin = 17,
+    Led3Pin = 27,
+    Led1Pin = 22,
+    Led2Pin = 10,
+    SensorPin = 2,
+    Sensor2Pin = 3,
 }
 const TIMEOUT_DURATION: u128 = 300;
 
