@@ -1,6 +1,10 @@
+use lazy_static::lazy_static;
+use std::{collections::HashMap, hash::Hash, sync::Mutex};
+
 use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
 use std::thread;
 
+#[derive(Clone, Copy)]
 #[repr(u8)]
 enum PinType {
     HeatingPin = 4,
@@ -11,7 +15,36 @@ enum PinType {
     SensorPin = 2,
     Sensor2Pin = 3,
 }
+
+impl PartialEq for PinType {
+    fn eq(&self, other: &Self) -> bool {
+        self == other
+    }
+}
+
+impl Eq for PinType {}
+
+impl Hash for PinType {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        (*self as u8).hash(state);
+    }
+}
+
 const TIMEOUT_DURATION: u128 = 300;
+
+lazy_static! {
+    static ref PIN_IN_USE: Mutex<HashMap<PinType, bool>> = {
+        let mut m = HashMap::new();
+        m.insert(PinType::HeatingPin, false);
+        m.insert(PinType::HumidifierPin, false);
+        m.insert(PinType::Led3Pin, false);
+        m.insert(PinType::Led1Pin, false);
+        m.insert(PinType::Led2Pin, false);
+        m.insert(PinType::SensorPin, false);
+        m.insert(PinType::Sensor2Pin, false);
+        Mutex::new(m)
+    };
+}
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
@@ -20,6 +53,8 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     pin.set_mode(Mode::Input);
     ready_sensor(&pin)?;
     read_data(&mut array, &pin)?;
+
+    release_pin(PinType::SensorPin)?;
 
     return Ok((
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
@@ -30,24 +65,28 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(PinType::HeatingPin)?;
     pin.set_high();
+    release_pin(PinType::HeatingPin)?;
     Ok(())
 }
 
 pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(PinType::HeatingPin)?;
     pin.set_low();
+    release_pin(PinType::HeatingPin)?;
     Ok(())
 }
 
 pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(PinType::HumidifierPin)?;
     pin.set_high();
+    release_pin(PinType::HumidifierPin)?;
     Ok(())
 }
 
 pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin = get_pin_as_output(PinType::HumidifierPin)?;
     pin.set_low();
+    release_pin(PinType::HumidifierPin)?;
     Ok(())
 }
 
@@ -60,6 +99,13 @@ pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
         _ => return Err(Box::from("Index")),
     };
     pin.set_high();
+
+    match led_index {
+        1 => release_pin(PinType::Led1Pin)?,
+        2 => release_pin(PinType::Led2Pin)?,
+        3 => release_pin(PinType::Led3Pin)?,
+        _ => return Err(Box::from("Index")),
+    };
     Ok(())
 }
 
@@ -72,6 +118,13 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
         _ => return Err(Box::from("Index")),
     };
     pin.set_low();
+
+    match led_index {
+        1 => release_pin(PinType::Led1Pin)?,
+        2 => release_pin(PinType::Led2Pin)?,
+        3 => release_pin(PinType::Led3Pin)?,
+        _ => return Err(Box::from("Index")),
+    };
     Ok(())
 }
 
@@ -122,6 +175,11 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
 }
 
 fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
+    let mut pins = PIN_IN_USE.lock().unwrap();
+
+    while *pins.get(&pin).unwrap() {}
+    *pins.get_mut(&pin).unwrap() = true;
+
     match Gpio::new() {
         Ok(gpio) => match gpio.get(pin as u8) {
             Ok(pin) => return Ok(pin),
@@ -138,6 +196,7 @@ fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
 fn get_pin_as_output(pin_type: PinType) -> Result<OutputPin, Box<dyn std::error::Error>> {
     let mut pin = get_pin(pin_type)?.into_output();
     pin.set_reset_on_drop(false);
+    release_pin(PinType::SensorPin)?;
     Ok(pin)
 }
 
@@ -160,5 +219,11 @@ fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error:
     {
         return Err(Box::from("Checksum"));
     }
+    Ok(())
+}
+
+fn release_pin(pin: PinType) -> Result<(), Box<dyn std::error::Error>> {
+    let mut pins = PIN_IN_USE.lock().unwrap();
+    *pins.get_mut(&pin).unwrap() = false;
     Ok(())
 }

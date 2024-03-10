@@ -1,5 +1,3 @@
-use image::error;
-
 use super::{database::sensor::SensorData, gpio::read_sensor_data};
 const MAX_RETRIES: u8 = 5;
 

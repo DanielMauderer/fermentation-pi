@@ -721,6 +721,7 @@ dependencies = [
  "engiffen",
  "glob 0.3.1",
  "image 0.23.10",
+ "lazy_static",
  "nokhwa",
  "pid",
  "rand 0.8.5",
