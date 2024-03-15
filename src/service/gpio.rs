@@ -34,17 +34,14 @@ lazy_static! {
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
-    let mut pin: IoPin = get_pin(PinType::SensorPin)?.into_io(rppal::gpio::Mode::Output);
-    start_signal(&mut pin)?;
-    warn!("1");
-
-    pin.set_mode(Mode::Input);
-    warn!("2");
-
-    ready_sensor(&pin)?;
-    warn!("3");
-    read_data(&mut array, &pin)?;
-    warn!("4");
+    let pin: IoPin = get_pin(PinType::SensorPin)?.into_io(rppal::gpio::Mode::Output);
+    match read_sensor_from_pin(pin, &mut array) {
+        Ok(_) => {}
+        Err(e) => {
+            release_pin(PinType::SensorPin)?;
+            return Err(e);
+        }
+    }
 
     release_pin(PinType::SensorPin)?;
 
@@ -52,6 +49,17 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
         convert_data_to_float(((array[2] as u16) << 8) | array[3] as u16),
     ));
+}
+
+fn read_sensor_from_pin(
+    mut pin: IoPin,
+    array: &mut [u8; 5],
+) -> Result<(), Box<dyn std::error::Error>> {
+    start_signal(&mut pin)?;
+    pin.set_mode(Mode::Input);
+    ready_sensor(&pin)?;
+    read_data(array, &pin)?;
+    Ok(())
 }
 
 pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
