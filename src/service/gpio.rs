@@ -161,12 +161,15 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
 }
 
 fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
-    warn!("locking pin: {}", pin as u8);
+    warn!("locking pin: {} ...", pin as u8);
 
     let mut pins = PIN_IN_USE.lock().unwrap();
+    warn!("getting lock pin: {}", pin as u8);
 
     while *pins.get(&pin).unwrap() {}
+
     *pins.get_mut(&pin).unwrap() = true;
+    warn!("locked pin: {}", pin as u8);
 
     match Gpio::new() {
         Ok(gpio) => match gpio.get(pin as u8) {
