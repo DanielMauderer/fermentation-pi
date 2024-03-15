@@ -36,9 +36,15 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
     let mut pin: IoPin = get_pin(PinType::SensorPin)?.into_io(rppal::gpio::Mode::Output);
     start_signal(&mut pin)?;
+    warn!("1");
+
     pin.set_mode(Mode::Input);
+    warn!("2");
+
     ready_sensor(&pin)?;
+    warn!("3");
     read_data(&mut array, &pin)?;
+    warn!("4");
 
     release_pin(PinType::SensorPin)?;
 
