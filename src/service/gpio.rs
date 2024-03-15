@@ -165,10 +165,13 @@ fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
 
     let mut pins = PIN_IN_USE.lock().unwrap();
     warn!("getting lock pin: {}", pin as u8);
+    let pin_lock = pins.get_mut(&pin).unwrap();
 
-    while *pins.get(&pin).unwrap() {}
+    warn!("pin status: {}", pin_lock);
 
-    *pins.get_mut(&pin).unwrap() = true;
+    while *pin_lock {}
+
+    *pin_lock = true;
     warn!("locked pin: {}", pin as u8);
 
     match Gpio::new() {
