@@ -4,7 +4,7 @@ use std::{collections::HashMap, hash::Hash, sync::Mutex};
 use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
 use std::thread;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
 enum PinType {
     HeatingPin = 4,
@@ -14,20 +14,6 @@ enum PinType {
     Led2Pin = 10,
     SensorPin = 2,
     Sensor2Pin = 3,
-}
-
-impl PartialEq for PinType {
-    fn eq(&self, other: &Self) -> bool {
-        self == other
-    }
-}
-
-impl Eq for PinType {}
-
-impl Hash for PinType {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        (*self as u8).hash(state);
-    }
 }
 
 const TIMEOUT_DURATION: u128 = 300;
