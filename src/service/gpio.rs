@@ -161,6 +161,8 @@ fn read_byte(pin: &IoPin) -> Result<u8, Box<dyn std::error::Error>> {
 }
 
 fn get_pin(pin: PinType) -> Result<Pin, Box<dyn std::error::Error>> {
+    warn!("locking pin: {}", pin as u8);
+
     let mut pins = PIN_IN_USE.lock().unwrap();
 
     while *pins.get(&pin).unwrap() {}
@@ -209,6 +211,8 @@ fn read_data(array: &mut [u8; 5], pin: &IoPin) -> Result<(), Box<dyn std::error:
 }
 
 fn release_pin(pin: PinType) -> Result<(), Box<dyn std::error::Error>> {
+    warn!("unlocking pin: {}", pin as u8);
+
     let mut pins = PIN_IN_USE.lock().unwrap();
     *pins.get_mut(&pin).unwrap() = false;
     Ok(())
