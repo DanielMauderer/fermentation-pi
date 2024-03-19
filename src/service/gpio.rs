@@ -1,4 +1,3 @@
-use image::error;
 use lazy_static::lazy_static;
 use std::{
     collections::HashMap,
@@ -51,7 +50,16 @@ lazy_static! {
 
 pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     let mut array: [u8; 5] = [0; 5];
-    let mut pin_lock = PINS.get(&PinType::SensorPin).unwrap().lock().unwrap();
+    let mut pin_lock = match PINS.get(&PinType::SensorPin) {
+        Some(pin) => match pin.lock() {
+            Ok(pin) => pin,
+            Err(e) => {
+                error!("Error: {}", e);
+                return Err(Box::from("Pin"));
+            }
+        },
+        None => return Err(Box::from("Pin not found")),
+    };
     pin_lock.set_mode(rppal::gpio::Mode::Output);
     match read_sensor_from_pin(&mut pin_lock, &mut array) {
         Ok(_) => {}
@@ -79,7 +87,16 @@ fn read_sensor_from_pin(
 }
 
 pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin_lock = PINS.get(&PinType::HeatingPin).unwrap().lock().unwrap();
+    let mut pin_lock = match PINS.get(&PinType::HeatingPin) {
+        Some(pin) => match pin.lock() {
+            Ok(pin) => pin,
+            Err(e) => {
+                error!("Error: {}", e);
+                return Err(Box::from("Pin"));
+            }
+        },
+        None => return Err(Box::from("Pin not found")),
+    };
 
     pin_lock.set_mode(rppal::gpio::Mode::Output);
     pin_lock.set_high();
@@ -87,7 +104,16 @@ pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin_lock = PINS.get(&PinType::HeatingPin).unwrap().lock().unwrap();
+    let mut pin_lock = match PINS.get(&PinType::HeatingPin) {
+        Some(pin) => match pin.lock() {
+            Ok(pin) => pin,
+            Err(e) => {
+                error!("Error: {}", e);
+                return Err(Box::from("Pin"));
+            }
+        },
+        None => return Err(Box::from("Pin not found")),
+    };
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_low();
@@ -95,7 +121,16 @@ pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin_lock = PINS.get(&PinType::HumidifierPin).unwrap().lock().unwrap();
+    let mut pin_lock = match PINS.get(&PinType::HumidifierPin) {
+        Some(pin) => match pin.lock() {
+            Ok(pin) => pin,
+            Err(e) => {
+                error!("Error: {}", e);
+                return Err(Box::from("Pin"));
+            }
+        },
+        None => return Err(Box::from("Pin not found")),
+    };
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_high();
@@ -103,7 +138,16 @@ pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
-    let mut pin_lock = PINS.get(&PinType::HumidifierPin).unwrap().lock().unwrap();
+    let mut pin_lock = match PINS.get(&PinType::HumidifierPin) {
+        Some(pin) => match pin.lock() {
+            Ok(pin) => pin,
+            Err(e) => {
+                error!("Error: {}", e);
+                return Err(Box::from("Pin"));
+            }
+        },
+        None => return Err(Box::from("Pin not found")),
+    };
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_low();
