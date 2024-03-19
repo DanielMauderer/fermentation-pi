@@ -75,6 +75,7 @@ pub fn entry_loop() {
             }
             task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
+        thread::sleep(std::time::Duration::from_secs(1));
         sensor_data = match get_sensor_data() {
             Ok(sensor_data) => sensor_data,
             Err(e) => {
@@ -82,6 +83,5 @@ pub fn entry_loop() {
                 continue;
             }
         };
-        thread::sleep(std::time::Duration::from_secs(1));
     }
 }
