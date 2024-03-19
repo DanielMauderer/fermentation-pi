@@ -59,7 +59,6 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
             return Err(e);
         }
     }
-    warn!("free lock for pin {}", PinType::SensorPin as u8);
 
     return Ok((
         convert_data_to_float(((array[0] as u16) << 8) | array[1] as u16),
@@ -70,7 +69,6 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
 fn get_pin_save(
     pin_number: PinType,
 ) -> Result<std::sync::MutexGuard<'static, IoPin>, Box<dyn std::error::Error>> {
-    warn!("requesting lock for pin {}", pin_number as u8);
     let pin_lock = match PINS.get(&pin_number) {
         Some(pin) => match pin.lock() {
             Ok(pin) => pin,
@@ -81,7 +79,6 @@ fn get_pin_save(
         },
         None => return Err(Box::from("Pin not found")),
     };
-    warn!("lock aquired for pin {}", pin_number as u8);
     Ok(pin_lock)
 }
 
@@ -101,7 +98,6 @@ pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
 
     pin_lock.set_mode(rppal::gpio::Mode::Output);
     pin_lock.set_high();
-    warn!("free lock for pin {}", PinType::HeatingPin as u8);
     Ok(())
 }
 
@@ -110,7 +106,6 @@ pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_low();
-    warn!("free lock for pin {}", PinType::HeatingPin as u8);
     Ok(())
 }
 
@@ -119,7 +114,6 @@ pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_high();
-    warn!("free lock for pin {}", PinType::HumidifierPin as u8);
     Ok(())
 }
 
@@ -128,7 +122,6 @@ pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
 
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_low();
-    warn!("free lock for pin {}", PinType::HumidifierPin as u8);
     Ok(())
 }
 
@@ -141,7 +134,6 @@ pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     };
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_high();
-    warn!("free led {}", led_index as u8);
     Ok(())
 }
 
@@ -154,7 +146,6 @@ pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     };
     pin_lock.set_mode(Mode::Output);
     pin_lock.set_low();
-    warn!("free led {}", led_index as u8);
 
     Ok(())
 }
