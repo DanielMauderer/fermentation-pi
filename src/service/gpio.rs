@@ -1,15 +1,13 @@
+use image::error;
 use lazy_static::lazy_static;
-use rocket::futures::future::err;
 use std::{
     collections::HashMap,
     hash::Hash,
     sync::{Arc, Mutex},
 };
 
-use rppal::gpio::{Gpio, IoPin, Mode, OutputPin, Pin};
+use rppal::gpio::{Gpio, IoPin, Mode};
 use std::thread;
-
-use crate::route::heartbeat::get;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
@@ -58,6 +56,7 @@ pub fn read_sensor_data() -> Result<(f32, f32), Box<dyn std::error::Error>> {
     match read_sensor_from_pin(&mut pin_lock, &mut array) {
         Ok(_) => {}
         Err(e) => {
+            error!("Error: {}", e);
             return Err(e);
         }
     }
