@@ -57,14 +57,6 @@ pub fn entry_loop() {
             task::sleep(Duration::from_secs(1 - hum_on_time as u64)).await;
         });
 
-        sensor_data = match get_sensor_data() {
-            Ok(sensor_data) => sensor_data,
-            Err(e) => {
-                error!("Error: {}", e);
-                continue;
-            }
-        };
-
         task::spawn(async move {
             if temp_on_time > 0.0 {
                 match turn_on_heating() {
@@ -83,6 +75,13 @@ pub fn entry_loop() {
             }
             task::sleep(Duration::from_secs(1 - temp_on_time as u64)).await;
         });
+        sensor_data = match get_sensor_data() {
+            Ok(sensor_data) => sensor_data,
+            Err(e) => {
+                error!("Error: {}", e);
+                continue;
+            }
+        };
         thread::sleep(std::time::Duration::from_secs(1));
     }
 }
