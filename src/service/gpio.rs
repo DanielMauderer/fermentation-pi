@@ -93,7 +93,7 @@ fn read_sensor_from_pin(
     Ok(())
 }
 
-pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = get_pin_save(PinType::HeatingPin)?;
 
     pin_lock.set_mode(rppal::gpio::Mode::Output);
@@ -101,7 +101,7 @@ pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_on_heating() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = get_pin_save(PinType::HeatingPin)?;
 
     pin_lock.set_mode(Mode::Output);
@@ -109,7 +109,7 @@ pub fn turn_off_heating() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = get_pin_save(PinType::HumidifierPin)?;
 
     pin_lock.set_mode(Mode::Output);
@@ -117,7 +117,7 @@ pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_on_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = get_pin_save(PinType::HumidifierPin)?;
 
     pin_lock.set_mode(Mode::Output);
@@ -125,7 +125,7 @@ pub fn turn_off_humidifier() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = match led_index {
         1 => get_pin_save(PinType::Led1Pin)?,
         2 => get_pin_save(PinType::Led2Pin)?,
@@ -137,7 +137,7 @@ pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-pub fn turn_off_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
+pub fn turn_on_led(led_index: u8) -> Result<(), Box<dyn std::error::Error>> {
     let mut pin_lock = match led_index {
         1 => get_pin_save(PinType::Led1Pin)?,
         2 => get_pin_save(PinType::Led2Pin)?,
