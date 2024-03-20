@@ -28,7 +28,8 @@ pub mod basic_runners {
 #[launch]
 async fn rocket() -> _ {
     thread::spawn(|| basic_runners::sensor_logger::entry_loop());
-    thread::spawn(|| basic_runners::manage_climate::entry_loop());
+    thread::spawn(|| basic_runners::manage_climate::entry_loop_hum());
+    thread::spawn(|| basic_runners::manage_climate::entry_loop_temp());
     let mut index_routes = routes![route::index::index, route::index::files];
     index_routes[1].rank = 2;
     let cors = CorsOptions::default().allowed_origins(AllowedOrigins::all());
