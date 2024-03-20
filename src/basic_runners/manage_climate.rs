@@ -8,8 +8,8 @@ use crate::service::{
     sensor::get_sensor_data,
 };
 
-const TEMP_DUTY_CYCLE: u64 = 1;
-const HUM_DUTY_CYCLE: u64 = 10;
+const TEMP_DUTY_CYCLE: f32 = 1.0;
+const HUM_DUTY_CYCLE: f32 = 10.0;
 
 pub fn entry_loop_hum() {
     let project = match get_active_project() {
@@ -42,7 +42,7 @@ pub fn entry_loop_hum() {
                         error!("Error: {}", e);
                     }
                 };
-                task::sleep(Duration::from_secs(HUM_DUTY_CYCLE * hum_on_time as u64)).await;
+                task::sleep(Duration::from_secs_f32(HUM_DUTY_CYCLE * hum_on_time)).await;
                 match turn_off_humidifier() {
                     Ok(_) => {}
                     Err(e) => {
@@ -50,10 +50,10 @@ pub fn entry_loop_hum() {
                     }
                 };
             }
-            task::sleep(Duration::from_secs(HUM_DUTY_CYCLE - hum_on_time as u64)).await;
+            task::sleep(Duration::from_secs_f32(HUM_DUTY_CYCLE - hum_on_time)).await;
         });
 
-        thread::sleep(std::time::Duration::from_secs(HUM_DUTY_CYCLE));
+        thread::sleep(std::time::Duration::from_secs_f32(HUM_DUTY_CYCLE));
         sensor_data = match get_sensor_data() {
             Ok(sensor_data) => sensor_data,
             Err(e) => {
@@ -99,7 +99,7 @@ pub fn entry_loop_temp() {
                         error!("Error: {}", e);
                     }
                 }
-                task::sleep(Duration::from_secs(TEMP_DUTY_CYCLE * temp_on_time as u64)).await;
+                task::sleep(Duration::from_secs_f32(TEMP_DUTY_CYCLE * temp_on_time)).await;
                 match turn_off_heating() {
                     Ok(_) => {}
                     Err(e) => {
@@ -107,9 +107,9 @@ pub fn entry_loop_temp() {
                     }
                 };
             }
-            task::sleep(Duration::from_secs(TEMP_DUTY_CYCLE - temp_on_time as u64)).await;
+            task::sleep(Duration::from_secs_f32(TEMP_DUTY_CYCLE - temp_on_time)).await;
         });
-        thread::sleep(std::time::Duration::from_secs(TEMP_DUTY_CYCLE));
+        thread::sleep(std::time::Duration::from_secs_f32(TEMP_DUTY_CYCLE));
         sensor_data = match get_sensor_data() {
             Ok(sensor_data) => sensor_data,
             Err(e) => {
