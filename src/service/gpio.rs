@@ -11,8 +11,8 @@ use std::thread;
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 #[repr(u8)]
 enum PinType {
-    HeatingPin = 4,
-    HumidifierPin = 17,
+    HeatingPin = 17,
+    HumidifierPin = 4,
     Led3Pin = 27,
     Led1Pin = 22,
     Led2Pin = 10,
