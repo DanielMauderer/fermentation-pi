@@ -31,7 +31,7 @@ pub fn entry_loop_hum() {
     };
 
     loop {
-        let next_control_output_hum = hum_pid.next_control_output(sensor_data.temp);
+        let next_control_output_hum = hum_pid.next_control_output(sensor_data.hum);
         let hum_on_time = next_control_output_hum.output / 100.0;
         warn!("hum_on_time: {}", hum_on_time);
         task::spawn(async move {
@@ -73,7 +73,8 @@ pub fn entry_loop_temp() {
         }
     };
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
-    temp_pid.p(20.0, 100.0).i(10.0, 100.0).d(0.20, 100.0);
+    info!("temp_pid: {:?}", project.settings.temp);
+    temp_pid.p(20.0, 100.0).i(0.0, 100.0).d(0.0, 100.0);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
         Ok(sensor_data) => sensor_data,
@@ -84,9 +85,12 @@ pub fn entry_loop_temp() {
     };
 
     loop {
-        let next_control_output_temp = temp_pid.next_control_output(sensor_data.hum);
+        let next_control_output_temp = temp_pid.next_control_output(sensor_data.temp);
         let temp_on_time = next_control_output_temp.output / 100.0;
-        warn!("temp_on_time: {}", temp_on_time);
+        warn!(
+            "target_temp: {} current_temp: {} temp_on_time: {}",
+            project.settings.temp, sensor_data.temp, temp_on_time
+        );
         task::spawn(async move {
             if temp_on_time > 0.0 {
                 match turn_on_heating() {
