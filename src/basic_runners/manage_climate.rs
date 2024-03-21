@@ -50,7 +50,10 @@ pub fn entry_loop_hum() {
                     }
                 };
             }
-            task::sleep(Duration::from_secs_f32(HUM_DUTY_CYCLE - hum_on_time)).await;
+            task::sleep(Duration::from_secs_f32(
+                HUM_DUTY_CYCLE - (HUM_DUTY_CYCLE * hum_on_time),
+            ))
+            .await;
         });
 
         thread::sleep(std::time::Duration::from_secs_f32(HUM_DUTY_CYCLE));
@@ -109,7 +112,10 @@ pub fn entry_loop_temp() {
                     };
                 }
             }
-            task::sleep(Duration::from_secs_f32(TEMP_DUTY_CYCLE - temp_on_time)).await;
+            task::sleep(Duration::from_secs_f32(
+                TEMP_DUTY_CYCLE - (TEMP_DUTY_CYCLE * temp_on_time),
+            ))
+            .await;
         });
         thread::sleep(std::time::Duration::from_secs_f32(TEMP_DUTY_CYCLE));
         sensor_data = match get_sensor_data() {
