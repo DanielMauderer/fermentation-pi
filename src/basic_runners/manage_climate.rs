@@ -100,12 +100,14 @@ pub fn entry_loop_temp() {
                     }
                 }
                 task::sleep(Duration::from_secs_f32(TEMP_DUTY_CYCLE * temp_on_time)).await;
-                match turn_off_heating() {
-                    Ok(_) => {}
-                    Err(e) => {
-                        error!("Error: {}", e);
-                    }
-                };
+                if temp_on_time < 0.995 {
+                    match turn_off_heating() {
+                        Ok(_) => {}
+                        Err(e) => {
+                            error!("Error: {}", e);
+                        }
+                    };
+                }
             }
             task::sleep(Duration::from_secs_f32(TEMP_DUTY_CYCLE - temp_on_time)).await;
         });
