@@ -74,7 +74,7 @@ pub fn entry_loop_temp() {
     };
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
     info!("temp_pid: {:?}", project.settings.temp);
-    temp_pid.p(40.0, 100.0).i(0.0, 100.0).d(0.0, 100.0);
+    temp_pid.p(60.0, 100.0).i(0.0, 100.0).d(0.0, 100.0);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
         Ok(sensor_data) => sensor_data,
