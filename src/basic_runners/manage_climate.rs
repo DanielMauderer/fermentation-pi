@@ -19,7 +19,7 @@ pub fn entry_loop_hum() {
             return;
         }
     };
-    let mut hum_pid: Pid<f32> = Pid::new(project.settings.hum, 100.0);
+    let mut hum_pid: Pid<f32> = Pid::new(project.settings.hum, 1.0);
     hum_pid.p(10.0, 100.0).i(4.5, 100.0).d(0.25, 100.0);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
@@ -31,8 +31,7 @@ pub fn entry_loop_hum() {
     };
 
     loop {
-        let next_control_output_hum = hum_pid.next_control_output(sensor_data.hum);
-        let hum_on_time = next_control_output_hum.output / 100.0;
+        let hum_on_time = (hum_pid.next_control_output(sensor_data.hum).output + 1.0) / 2.0;
         warn!("hum_on_time: {}", hum_on_time);
         task::spawn(async move {
             if hum_on_time > 0.0 {
@@ -75,9 +74,9 @@ pub fn entry_loop_temp() {
             return;
         }
     };
-    let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 100.0);
+    let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, 1.0);
     info!("temp_pid: {:?}", project.settings.temp);
-    temp_pid.p(21.7, 100.0).i(0.0, 100.0).d(79.60, 100.0);
+    temp_pid.p(35.0, 100.0).i(0.09, 100.0).d(10.0, 100.0);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
         Ok(sensor_data) => sensor_data,
@@ -88,8 +87,7 @@ pub fn entry_loop_temp() {
     };
 
     loop {
-        let next_control_output_temp = temp_pid.next_control_output(sensor_data.temp);
-        let temp_on_time = next_control_output_temp.output / 100.0;
+        let temp_on_time = (temp_pid.next_control_output(sensor_data.temp).output + 1.0) / 2.0;
         warn!(
             "target_temp: {} current_temp: {} temp_on_time: {}",
             project.settings.temp, sensor_data.temp, temp_on_time
