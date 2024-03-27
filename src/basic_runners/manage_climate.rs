@@ -85,7 +85,12 @@ pub fn entry_loop_temp() {
             return;
         }
     };
-
+    match turn_off_heating() {
+        Ok(_) => {}
+        Err(e) => {
+            error!("Error: {}", e);
+        }
+    };
     loop {
         let temp_on_time = (temp_pid.next_control_output(sensor_data.temp).output + 1.0) / 2.0;
         warn!(
