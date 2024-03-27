@@ -31,7 +31,7 @@ pub fn entry_loop_hum() {
     };
 
     loop {
-        let hum_on_time = hum_pid.next_control_output(sensor_data.hum).output / 200.0;
+        let hum_on_time = hum_pid.next_control_output(sensor_data.hum).output / 100.0;
         warn!("hum_on_time: {}", hum_on_time);
         task::spawn(async move {
             if hum_on_time > 0.0 {
