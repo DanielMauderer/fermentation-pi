@@ -9,7 +9,7 @@ use crate::service::{
 };
 
 const TEMP_DUTY_CYCLE: f32 = 1.0;
-const HUM_DUTY_CYCLE: f32 = 10.0;
+const HUM_DUTY_CYCLE: f32 = 1.0;
 const PID_LIMIT: f32 = 100.0;
 
 pub fn entry_loop_hum() {
@@ -31,6 +31,13 @@ pub fn entry_loop_hum() {
         Err(e) => {
             error!("Error: {}", e);
             return;
+        }
+    };
+
+    match turn_off_humidifier() {
+        Ok(_) => {}
+        Err(e) => {
+            error!("Error: {}", e);
         }
     };
 
