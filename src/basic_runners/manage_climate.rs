@@ -45,7 +45,10 @@ pub fn entry_loop_hum() {
         let hum_on_percentage = hum_pid.next_control_output(sensor_data.hum).output / PID_LIMIT;
         let hum_on_time = hum_on_percentage * HUM_DUTY_CYCLE;
         let hum_off_time = HUM_DUTY_CYCLE - hum_on_time;
-        warn!("hum_on_time: {}", hum_on_time);
+        warn!(
+            "target_hum: {} current_hum: {} temp_on_hum: {}",
+            project.settings.hum, sensor_data.hum, hum_on_time
+        );
         task::spawn(async move {
             if hum_on_percentage > 0.0 {
                 match turn_on_humidifier() {
