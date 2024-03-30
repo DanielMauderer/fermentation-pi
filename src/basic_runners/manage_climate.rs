@@ -22,9 +22,9 @@ pub fn entry_loop_hum() {
     };
     let mut hum_pid: Pid<f32> = Pid::new(project.settings.hum, PID_LIMIT);
     hum_pid
-        .p(10.0, PID_LIMIT)
-        .i(4.5, PID_LIMIT)
-        .d(0.25, PID_LIMIT);
+        .p(35.0, PID_LIMIT)
+        .i(0.09, PID_LIMIT)
+        .d(10.0, PID_LIMIT);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
         Ok(sensor_data) => sensor_data,
@@ -82,9 +82,9 @@ pub fn entry_loop_temp() {
     let mut temp_pid: Pid<f32> = Pid::new(project.settings.temp, PID_LIMIT);
     info!("temp_pid: {:?}", project.settings.temp);
     temp_pid
-        .p(2.5, PID_LIMIT)
-        .i(0.2, PID_LIMIT)
-        .d(2.5, PID_LIMIT);
+        .p(35.0, PID_LIMIT)
+        .i(0.09, PID_LIMIT)
+        .d(10.0, PID_LIMIT);
 
     let mut sensor_data: SensorData = match get_sensor_data() {
         Ok(sensor_data) => sensor_data,
